@@ -18,7 +18,7 @@ class LinkedList:
 
 
     # Добавление в конец ноду
-    def append(self, val: int) -> None:
+    def adding_to_the_end(self, val: int) -> None:
         self.lens+=1
 
         # Сохранение главного элемента
@@ -26,6 +26,19 @@ class LinkedList:
         while tmp.next:
             tmp = tmp.next
         tmp.next = Node(val=val)
+
+
+    # Добавление узла в начало
+    def adding_to_the_beginning(self, val: int) -> None:
+        self.lens += 1
+
+        node = Node(val=val)
+        current = self.root
+        node.next = current
+        self.root = node
+
+    # Добавление узла по индексу
+    # ------
 
 
 
@@ -43,7 +56,7 @@ class LinkedList:
 
 
 
-    # Поиск элемента
+    # Проверка наличия элемента по значению
     def search(self, val: int) -> bool:
         tmp = self.root
         while tmp:
@@ -51,6 +64,7 @@ class LinkedList:
                 return True
             tmp = tmp.next
         return False
+
 
 
 
@@ -65,6 +79,7 @@ class LinkedList:
             tmp.next = None
         elif tmp:
             self.root = None
+        self.lens-=1
 
 
 
@@ -112,6 +127,7 @@ class LinkedList:
             print("Такого индекса нет в списке")
             return
 
+        self.lens-=1
         if index==1:
             self.root = self.root.next
             return
@@ -130,12 +146,15 @@ class LinkedList:
             index_remove+=1
 
 
+    # Удаление узла по значению
     def remove_node_value(self, val: int):
         prev = None
         current = self.root
 
+        self.lens-=1
         if current.val==val:
             self.root = self.root.next
+
             return
 
         while current:
@@ -145,7 +164,10 @@ class LinkedList:
 
             prev = current
             current = current.next
+
+        self.lens+=1
         print('Нет узла с таким значением')
 
 list = LinkedList( root=Node(10) )
-list.outputs()
+list.adding_to_the_beginning(9)
+print(1)
