@@ -82,28 +82,70 @@ class LinkedList:
         self.root = prev
 
 
+
     # Получить узел по индексу, индексация начинается с 1
-    def get_node(self, index: int) -> str or int:
+    def get_node_index(self, index: int) -> str or Node:
         if index>self.lens or index<=0:
             return "Такого индекса нет в списке"
 
         tmp = self.root
         for _ in range(index-1):
             tmp = tmp.next
-        return tmp.val
+        return tmp
+
+
+
+    # Получить узел по значению
+    def get_node_val(self, val: int) -> str or Node:
+        current = self.root
+        while current:
+            if current.val==val:
+                return current
+            current = current.next
+        return 'Нет узла с таким значением'
 
 
 
     # Удаление узла по индексу, индексация начинается с 1
-    def remove_node(self, index: int):
+    def remove_node_index(self, index: int):
         if index>self.lens or index<=0:
-            return "Такого индекса нет в списке"
+            print("Такого индекса нет в списке")
+            return
+
+        if index==1:
+            self.root = self.root.next
+            return
+
+        index_remove = 1
+        prev = None
+        current = self.root
+
+        while current:
+            if index_remove==index:
+                prev.next = current.next
+                return
+
+            prev = current
+            current = current.next
+            index_remove+=1
 
 
+    def remove_node_value(self, val: int):
+        prev = None
+        current = self.root
 
-ll = LinkedList( root=Node(10) )
-ll.append(11)
-ll.append(12)
-ll.outputs()
-ll.remove_node(1)
-ll.outputs()
+        if current.val==val:
+            self.root = self.root.next
+            return
+
+        while current:
+            if current.val==val:
+                prev.next = current.next
+                return
+
+            prev = current
+            current = current.next
+        print('Нет узла с таким значением')
+
+list = LinkedList( root=Node(10) )
+list.outputs()
