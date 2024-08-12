@@ -4,10 +4,8 @@ class Node:
         self.val = val
         self.next = next
 
-
-
 # Класс для управления всем связанные списком.
-class LinkedList:
+class singly_LinkedList:
     lens = 0 # Длина нашего связного списка
     # Инициализация конструктора класса
     def __init__(self, root: Node) -> None:
@@ -16,13 +14,15 @@ class LinkedList:
         self.lens += 1
 
 
-
     # Добавление в конец ноду
     def adding_to_the_end(self, val: int) -> None:
         self.lens+=1
 
-        # Сохранение главного элемента
+
         tmp = self.root
+        if tmp==None:
+            self.root = Node(val=val)
+            return
         while tmp.next:
             tmp = tmp.next
         tmp.next = Node(val=val)
@@ -37,9 +37,29 @@ class LinkedList:
         node.next = current
         self.root = node
 
-    # Добавление узла по индексу
-    # ------
 
+    # Добавление узла по номеру(после введенного номера), нумерация начинается с 1
+    def adding_to_the_number(self, num: int, val: int) -> None or str:
+        if num>self.lens:
+            return 'Такого номера в списке нет'
+        self.lens += 1
+        if num==0:
+            node = Node(val=val)
+            node.next = self.root
+            self.root = node
+            return
+
+
+        current = self.root
+        while True:
+            if num==1:
+                node = Node(val=val)
+                nexts = current.next
+                current.next = node
+                node.next = nexts
+                return
+            current = current.next
+            num -= 1
 
 
     # Вывод на экран значений нодов
@@ -54,8 +74,6 @@ class LinkedList:
         print()
 
 
-
-
     # Проверка наличия элемента по значению
     def search(self, val: int) -> bool:
         tmp = self.root
@@ -64,8 +82,6 @@ class LinkedList:
                 return True
             tmp = tmp.next
         return False
-
-
 
 
     # Удаление элемента с конца
@@ -82,7 +98,6 @@ class LinkedList:
         self.lens-=1
 
 
-
     # Переворот за O(n)
     def reverse(self) -> None:
         prev = None # Предыдущий
@@ -97,7 +112,6 @@ class LinkedList:
         self.root = prev
 
 
-
     # Получить узел по индексу, индексация начинается с 1
     def get_node_index(self, index: int) -> str or Node:
         if index>self.lens or index<=0:
@@ -107,7 +121,6 @@ class LinkedList:
         for _ in range(index-1):
             tmp = tmp.next
         return tmp
-
 
 
     # Получить узел по значению
@@ -120,15 +133,18 @@ class LinkedList:
         return 'Нет узла с таким значением'
 
 
-
     # Удаление узла по индексу, индексация начинается с 1
-    def remove_node_index(self, index: int):
+    def remove_node_index(self, index: int) -> None:
         if index>self.lens or index<=0:
             print("Такого индекса нет в списке")
             return
 
         self.lens-=1
         if index==1:
+            if self.lens==1:
+                self.root = None
+                return
+
             self.root = self.root.next
             return
 
@@ -154,7 +170,6 @@ class LinkedList:
         self.lens-=1
         if current.val==val:
             self.root = self.root.next
-
             return
 
         while current:
@@ -167,7 +182,3 @@ class LinkedList:
 
         self.lens+=1
         print('Нет узла с таким значением')
-
-list = LinkedList( root=Node(10) )
-list.adding_to_the_beginning(9)
-print(1)
