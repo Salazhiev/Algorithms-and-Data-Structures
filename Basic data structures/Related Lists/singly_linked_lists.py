@@ -40,7 +40,7 @@ class singly_LinkedList:
 
     # Добавление узла по номеру(после введенного номера), нумерация начинается с 1
     def adding_to_the_number(self, num: int, val: int) -> None or str:
-        if num>self.lens:
+        if num>self.lens or num<0:
             return 'Такого номера в списке нет'
         self.lens += 1
         if num==0:
@@ -103,7 +103,7 @@ class singly_LinkedList:
         prev = None # Предыдущий
         current = self.root # Этот
 
-        while current:
+        while current!=None:
             nxt = current.next
             current.next = prev
             prev = current
@@ -182,3 +182,4 @@ class singly_LinkedList:
 
         self.lens+=1
         print('Нет узла с таким значением')
+
