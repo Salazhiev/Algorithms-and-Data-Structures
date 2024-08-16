@@ -74,6 +74,7 @@ class singly_LinkedList:
         print()
 
 
+
     # Проверка наличия элемента по значению
     def search(self, val: int) -> bool:
         tmp = self.root
@@ -163,7 +164,7 @@ class singly_LinkedList:
 
 
     # Удаление узла по значению
-    def remove_node_value(self, val: int):
+    def remove_node_value(self, val: int) -> None:
         prev = None
         current = self.root
 
@@ -183,3 +184,9 @@ class singly_LinkedList:
         self.lens+=1
         print('Нет узла с таким значением')
 
+l = singly_LinkedList(Node(val=10))
+l.adding_to_the_end(11)
+l.outputs()
+l.remove_node_index(2)
+l.outputs()
+print()

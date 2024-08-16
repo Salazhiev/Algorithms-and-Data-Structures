@@ -18,8 +18,6 @@ class cycle_singly_LinkedList:
         self.head.next = self.tail
         self.tail.next = self.head
 
-
-
     # Добавление узла в конец списка.
     def adding_to_the_end(self, val: int) -> None:
         self.lens += 1
@@ -32,7 +30,7 @@ class cycle_singly_LinkedList:
             self.head = newNode
             self.tail = newNode
 
-            # Заворчачиваем списко в себя же.
+            # Заворчачиваем список в себя же.
             newNode.next = self.head
         else:
             # Если у нас в списке есть элементы,
@@ -44,8 +42,6 @@ class cycle_singly_LinkedList:
 
             # Заворачиваем список в себя же.
             self.tail.next = self.head
-
-
 
     # Добавление узла в начало.
     def addding_to_the_beginnig(self, val: int) -> None:
@@ -67,8 +63,6 @@ class cycle_singly_LinkedList:
 
             # В данной строчке, мы зацикливаем наш список.
             self.tail.next = self.head
-
-
 
     # Добавление узла по номеру(после введенного номера), нумерация начинается с 1
     def adding_to_the_number(self, num: int, val: int) -> None or str:
@@ -112,8 +106,6 @@ class cycle_singly_LinkedList:
             current = current.next
             num -= 1
 
-
-
     # Вывод на экран значений узлов.
     def outputs(self) -> None:
         # Берем головной элемент.
@@ -132,8 +124,26 @@ class cycle_singly_LinkedList:
             a-=1
             current = current.next
         print()
+    # Более продвинутый вывод на экран.
+    def upgrade_outputs(self, k: int):
+        current = self.head
+        if current.val==None:
+            print('Элементов в списке нет!')
 
+        print(f'Длина списка {self.lens}: --> ', end='')
+        a = self.lens * 2 + k
+        while a>0:
+            if self.head == current:
+                print(f"head val:{current.val} --> ", end='')
+            elif self.tail == current:
+                print(f"tail val:{current.val} --> ", end='')
+            else:
+                print(f"alpha val:{current.val} --> ", end='')
 
+            a-=1
+            current = current.next
+
+        print()
 
     # Проверка наличия элемента по значению.
     def search(self, val: int) -> bool:
@@ -150,7 +160,6 @@ class cycle_singly_LinkedList:
             # Бегаем по массиву.
             current = current.next
         return False
-
 
     # Удаление элемента с конца.
     def pop(self) -> None:
@@ -169,7 +178,6 @@ class cycle_singly_LinkedList:
         current.next = self.head
         self.tail = current
         self.lens -= 1
-
     # Перевеорот спрска на О(1)
     def reverse(self) -> None:
         # Создаем указатель на хвост списка.
@@ -191,8 +199,6 @@ class cycle_singly_LinkedList:
 
         # Меняем головной элемент.
         self.head = prev
-
-
     # Получить узел по индексу, индексация начинается с 1
     def get_node_index(self, index: int) -> str or Node:
         # Если инедкс не входит в рамки массива, то смысла нет в поиске.
@@ -206,8 +212,6 @@ class cycle_singly_LinkedList:
             current = current.next
         # Ну и возвращаем этот элемент, на котором мы остановились.
         return current
-
-
     # Получить узел по значению.
     def get_node_val(self, val: int) -> str or Node:
         current = self.head
@@ -218,40 +222,62 @@ class cycle_singly_LinkedList:
                 return current
             current = current.next
         return 'Нет узла с таким значением'
-
-
-    # Удаление узла по индексу, индексация начинается 1.
+    # Удаление узла по индексу, индексация начинается с 1.
     def remove_node_index(self, index: int) -> None:
+        # Проверка, что наш индекс находится в нужны границах.
         if index>self.lens or index<=0:
             print('Такого индекса нет в списке')
             return
 
-        self.lens -= 1
+        # Рассмотрения случай когда удалять нужно первый элемент.
         if index==1:
             if self.lens==1:
+                # Опустошаем не опусташенные непустоши.
                 self.head.val = None
                 self.tail.val = None
-                return
+            else:
+                # Если длина больше одного, то просто необходимо удалить первый элемент.
+                self.head = self.head.next
+                self.tail.next = self.head
+            self.lens -= 1
+            return
 
+        # Сохраняем два стоящих друг друга узла.
+        prev = None
+        check = index
+        current = self.head
+        while index-1>0:
+            prev = current
+            current = current.next
+            index -= 1
+        prev.next = current.next
+        if self.lens==check:
+            self.tail = prev
+        self.lens -= 1
+    # Удаление узла по значению.
+    def remove_node_value(self, val: int) -> None:
+        prev = None
+        current = self.head
+        check = self.lens
+        self.lens-=1
+        if current.val==val:
             self.head = self.head.next
             self.tail.next = self.head
-
-        # НЕ РАБОТАЕТ ДАННАЯ ФУНКЦИЯ, ТАКЖЕ ПРОВЕРИТЬ РАБОТАЕТ ЛИ ВСЕ В ДВУХ ДРУГИХ ПРОЕКТАХ,  ТАК КАК
-        # ПОЯВИЛИСЬ СОМНЕНИЯ, ЧТО ВСЕ РАБОТАЕТ!!!
+            return
 
 
+        while check>0:
+            if current.val==val:
+                if check==1:
+                    self.tail = prev
+                    self.tail.next = self.head
+                else:
+                    prev.next = current.next
+                return
 
+            prev = current
+            current = current.next
+            check -= 1
 
-# проверим для начала вывод на экран элементов, дальше проверим функцию добавления по номеру.
-
-l = cycle_singly_LinkedList()
-l.adding_to_the_end(10)
-l.adding_to_the_end(11)
-l.adding_to_the_end(12)
-l.adding_to_the_end(13)
-l.adding_to_the_end(14)
-l.outputs()
-l.remove_node_index(1)
-l.outputs()
-
-print(1)
+        self.lens+=1
+        print('Нет узла с таким значением!')
