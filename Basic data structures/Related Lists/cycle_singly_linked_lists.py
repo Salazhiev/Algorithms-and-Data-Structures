@@ -199,6 +199,8 @@ class cycle_singly_LinkedList:
 
         # Меняем головной элемент.
         self.head = prev
+
+
     # Получить узел по индексу, индексация начинается с 1
     def get_node_index(self, index: int) -> str or Node:
         # Если инедкс не входит в рамки массива, то смысла нет в поиске.
@@ -212,6 +214,11 @@ class cycle_singly_LinkedList:
             current = current.next
         # Ну и возвращаем этот элемент, на котором мы остановились.
         return current
+
+
+
+
+
     # Получить узел по значению.
     def get_node_val(self, val: int) -> str or Node:
         current = self.head
@@ -222,6 +229,14 @@ class cycle_singly_LinkedList:
                 return current
             current = current.next
         return 'Нет узла с таким значением'
+
+
+
+
+
+
+
+
     # Удаление узла по индексу, индексация начинается с 1.
     def remove_node_index(self, index: int) -> None:
         # Проверка, что наш индекс находится в нужны границах.
@@ -254,6 +269,10 @@ class cycle_singly_LinkedList:
         if self.lens==check:
             self.tail = prev
         self.lens -= 1
+
+
+
+
     # Удаление узла по значению.
     def remove_node_value(self, val: int) -> None:
         prev = None
@@ -281,3 +300,8 @@ class cycle_singly_LinkedList:
 
         self.lens+=1
         print('Нет узла с таким значением!')
+
+l = cycle_singly_LinkedList()
+l.adding_to_the_end(10)
+l.pop()
+l.outputs()
