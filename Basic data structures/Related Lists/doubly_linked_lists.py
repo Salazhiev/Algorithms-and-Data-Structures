@@ -4,7 +4,7 @@ class Node:
         self.next = next
         self.prev = prev
 
-class doubly_LinkedList:
+class DoublyLinkedList:
     lens = 0
 
     def __init__(self, root: Node) -> None:

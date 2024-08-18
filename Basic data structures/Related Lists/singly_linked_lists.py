@@ -5,7 +5,7 @@ class Node:
         self.next = next
 
 # Класс для управления всем связанные списком.
-class singly_LinkedList:
+class SinglyLinkedList:
     lens = 0 # Длина нашего связного списка
     # Инициализация конструктора класса
     def __init__(self, root: Node) -> None:
