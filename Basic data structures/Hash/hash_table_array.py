@@ -6,7 +6,7 @@ class HashTable:
 
     # Инициализация конструктора класса, на выходе получает аргумент
     # - количество бакетов, по умолчанию равно 100.
-    def __init__(self, size=10):
+    def __init__(self, size=5):
         # Количество бакетов.
         self.size = size
 
@@ -17,6 +17,7 @@ class HashTable:
 
     # Функция для получения хеш-кода, принимает на вход ключ.
     def hash_function(self, key):
+        # Вычисляем хеш-код с помощью встроенной функции.
         return hash(key) % self.size
 
 
@@ -26,7 +27,7 @@ class HashTable:
         # Вычисляем индекс бакета.
         hash_code = self.hash_function(key)
 
-        # Проверка, нужно ли обновить количесто бакетов
+        # Проверка, нужно ли обновить количесто бакетов.
         if self.lens==self.size:
             # Если все же нужно обновить, то новый размер количеств бактов, увеличивается
             # в два раза.
@@ -47,12 +48,16 @@ class HashTable:
 
         # Проверяем, существует ли ключ в таблице
         for kv_pair in self.table[hash_code]:
+            # Если такой ключ существует, то мы просто меняем его значение на новое.
             if kv_pair[0] == key:
+                # Сама непосредственно замена.
                 kv_pair[1] = value
+                # Завершение работы функции, так как все готово.
                 return
 
         # Если ключ не найден, добавляем новую пару.
-        self.table[hash_code].append([key, value])
+        self.table[hash_code].append( [key, value] )
+        # Также увеличиваем количество пар на одну единицу.
         self.lens += 1
 
 
@@ -78,13 +83,28 @@ class HashTable:
             if kv_pair[0] == key:
                 del self.table[hash_code][i]
                 return True
-
         return False
+
 
     # Красивый вывод :)
     def __str__(self):
-        result = ''
+        result = 'HashTable contents:\n'
         for i, bucket in enumerate(self.table):
             if bucket:
                 result += f'Index {i}: {bucket}\n'
         return result
+
+
+h = HashTable()
+h.insert('Иса', 20)
+h.insert('Муса', 21)
+h.insert('Адам', 50)
+h.insert('Хава', 45)
+h.insert('Иман', 16)
+h.insert('Амина', 4)
+h.remove('Амина')
+h.remove('Иса')
+h.remove('Адам')
+print(h)
+print(h.table)
+print(h.get('Хава'))
