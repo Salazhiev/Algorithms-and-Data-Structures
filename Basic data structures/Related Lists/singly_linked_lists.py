@@ -184,7 +184,7 @@ class SinglyLinkedList:
         self.lens+=1
         print('Нет узла с таким значением')
 
-l = singly_LinkedList(Node(val=10))
+l = SinglyLinkedList(Node(val=10))
 l.adding_to_the_end(11)
 l.outputs()
 l.remove_node_index(2)

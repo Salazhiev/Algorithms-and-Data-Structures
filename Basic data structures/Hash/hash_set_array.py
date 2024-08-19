@@ -76,6 +76,7 @@ class HashSet:
         # Удаляем значению, если он присутсвует в нашем множестве.
         if value in self.table[hash_code]:
             self.table[hash_code].remove(value)
+            self.lens -= 1
         else:
             print('В Хеш-Множестве нет такого значения!')
 
