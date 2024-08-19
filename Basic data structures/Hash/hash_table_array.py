@@ -82,6 +82,7 @@ class HashTable:
         for i, kv_pair in enumerate(self.table[hash_code]):
             if kv_pair[0] == key:
                 del self.table[hash_code][i]
+                self.lens -= 1
                 return True
         return False
 
