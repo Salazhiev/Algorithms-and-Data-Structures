@@ -1,29 +1,50 @@
+# Бинарное дерево поиска - дерево у которого максимум два потомка, где левый узел с потомства имеет
+# значение меньшее чем значение у родителя, соответственно правое значение потомства имеет большее значение чем
+# у родителя.
+
+
+# Класс описыващий отдельный узел дерева.
 class Node:
     def __init__(self, data):
+        # Значение дерева.
         self.data = data
+
+        # Левый и Правый узел, рассматриваемого узла.
         self.left = None
         self.right = None
 
+# Класс описывающий все дерево целиком.
 class Tree:
+    # Инициализация класса.
     def __init__(self):
         self.root = None
 
 
+    # Внутренний метод класса.
+    # Возращает узел, к которому должен быть прикреплен новый узел, со значением value,
+    # его родителя и
+    # True - если такой узел уже есть.
     def __find(self, node, parent, value):
+        # Если у нас отсутствует узел, с которым мы сравниваем значения value.
         if node is None:
             return None, parent, False
 
+        # Если в процессе наткнулись на такой же узел, завершаем
+        # работу функции возвращая True.
         if value==node.data:
             return node, parent, True
 
+        # Более менее очевидно.
         if value < node.data:
             if node.left:
                 return self.__find(node.left, node, value)
+
+        # Более менее очевидно.
         if value > node.data:
             if node.right:
                 return self.__find(node.right, node, value)
-        # node - узел к которому мы будем добавлять новый узел.
-        # parent - родительский узел для node.
+
+
         return node, parent, False
 
 
@@ -39,6 +60,10 @@ class Tree:
                 s.left = obj
             else:
                 s.right = obj
+        elif fl_find == True:
+            print('Такое узел уже существует.')
+        else:
+            print('Нет узла, к которому мы смогли бы прикрепить этот.')
 
         return obj
 
@@ -51,6 +76,7 @@ class Tree:
         self.show_tree(node.left)
         print(node.data)
         self.show_tree(node.right)
+
 
 
     # Отображение элементов с обходом дерева в ширину
@@ -76,6 +102,8 @@ class Tree:
             p.left = None
         elif p.right == s:
             p.right = None
+
+
     def __del_one_child(self, s, p):
         if p.left == s:
             if s.left is None:
@@ -87,6 +115,8 @@ class Tree:
                 p.right = s.right
             elif s.right is None:
                 p.right = s.left
+
+
     def __find_min(self, node, parent):
         if node.left:
             return self.__find_min(node.left, node)
