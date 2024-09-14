@@ -96,13 +96,13 @@ class Tree:
 
     # Отображение элементов с обходом дерева в глубину.
     def show_tree(self, node):
-        if node is None:
-            return
 
         # Очевидно как отработает данная рекурсия, будем идти с левой глубины к правой.
-        self.show_tree(node.left)
+        if node.left:
+            self.show_tree(node.left)
         print(node.data)
-        self.show_tree(node.right)
+        if node.right:
+            self.show_tree(node.right)
 
 
 
@@ -200,3 +200,19 @@ class Tree:
             s.data = sr.data
             # Вызиваем функцию для удаления элемента, который был поставлен на место удаленного.
             self.__del_one_child(sr, pr)
+
+
+
+
+
+tree = Tree()
+tree.append(Node(5))
+tree.append(Node(3))
+tree.append(Node(1))
+tree.append(Node(4))
+tree.append(Node(7))
+tree.append(Node(11))
+tree.append(Node(6))
+
+print(tree.show_end_leaf(tree.root))
+print()
