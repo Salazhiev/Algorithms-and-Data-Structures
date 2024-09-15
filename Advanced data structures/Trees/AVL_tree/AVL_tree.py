@@ -1,3 +1,5 @@
+import random
+
 class Node:
     def __init__(self, value):
         self.value = value
@@ -50,6 +52,9 @@ class AVLTree:
             return self.left_rotate(root)
 
         return root
+
+    def insert_value(self, value):
+        self.root = self.insert(self.root, value)
 
     def delete(self, root, value):
         if not root:
@@ -123,6 +128,7 @@ class AVLTree:
 
         return y
 
+
     def min_value_node(self, root):
         current = root
         while current.left:
@@ -136,8 +142,7 @@ class AVLTree:
             return self.search(root.right, value)
         return self.search(root.left, value)
 
-    def insert_value(self, value):
-        self.root = self.insert(self.root, value)
+
 
     def delete_value(self, value):
         self.root = self.delete(self.root, value)
@@ -146,19 +151,14 @@ class AVLTree:
         return self.search(self.root, value)
 
 
-# Example usage:
-if __name__ == "__main__":
+
+arr = [
+    [1,2,3,4,5,6,7,8]
+]
+
+for i in range(8):
     tree = AVLTree()
-    tree.insert_value(10)
-    tree.insert_value(15)
-    tree.insert_value(20)
-    tree.insert_value(17)
-    tree.insert_value(30)
-    tree.insert_value(40)
-    # tree.insert_value(10)
-    # tree.insert_value(20)
-    # tree.insert_value(30)
-    # tree.insert_value(40)
-    # tree.insert_value(50)
-    # tree.insert_value(60)
+    for j in range(8):
+        tree.insert_value(arr[i][j])
+
     print()

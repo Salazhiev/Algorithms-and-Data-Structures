@@ -202,17 +202,30 @@ class Tree:
             self.__del_one_child(sr, pr)
 
 
+arr = [
+    [45, 32, 72, 70, 28, 21, 56, 16],
+    [77, 11, 16, 91, 86, 63, 67, 71],
+    [93, 28, 2, 77, 4, 90, 91, 89],
+    [62, 31, 95, 65, 47, 83, 30, 7],
+    [68, 13, 41, 94, 31, 37, 20, 85],
+    [58, 86, 31, 15, 57, 39, 96, 44],
+    [34, 59, 38, 30, 90, 59, 8, 56],
+    [84, 78, 19, 34, 32, 13, 42, 69]
+]
+
+for i in range(8):
+    tree = Tree()
+    for j in range(8):
+        tree.append(Node(arr[i][j]))
+
+    print()
 
 
-
-tree = Tree()
-tree.append(Node(5))
-tree.append(Node(3))
-tree.append(Node(1))
-tree.append(Node(4))
-tree.append(Node(7))
-tree.append(Node(11))
-tree.append(Node(6))
-
-print(tree.show_end_leaf(tree.root))
-print()
+# tree = Tree()
+# tree.append(Node(5))
+# tree.append(Node(3))
+# tree.append(Node(1))
+# tree.append(Node(4))
+# tree.append(Node(7))
+# tree.append(Node(11))
+# tree.append(Node(6))
