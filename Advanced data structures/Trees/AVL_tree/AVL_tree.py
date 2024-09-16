@@ -65,17 +65,25 @@ class AVLTree:
         elif value > root.value:
             root.right = self.delete(root.right, value)
         else:
+            # 1. Случай
+            # Данные два условия проверка на то, что удаляемый узел - один, тоесть у него
+            # нет либо левого потомка, либо правого.
             if not root.left:
                 temp = root.right
-                root = None
                 return temp
             elif not root.right:
                 temp = root.left
-                root = None
                 return temp
 
+
+            # 2. Случай
+            # Если у удаляемого узла есть и левый и правый потомок.
+
+            # Ищем минимальный узел у правого поддерева у удаляемого узла.
             temp = self.min_value_node(root.right)
+            # Меняем значением у удаляемого узла, на минимальный у temp.
             root.value = temp.value
+            # Удаляем узел с минимальным значением, который мы искали.
             root.right = self.delete(root.right, temp.value)
 
         if not root:
@@ -152,13 +160,9 @@ class AVLTree:
 
 
 
-arr = [
-    [1,2,3,4,5,6,7,8]
-]
-
-for i in range(8):
-    tree = AVLTree()
-    for j in range(8):
-        tree.insert_value(arr[i][j])
-
-    print()
+tree = AVLTree()
+arr = [1,2,3,4,5,6,7,8]
+for val in arr:
+    tree.insert_value(val)
+print()
+tree.delete_value(6)

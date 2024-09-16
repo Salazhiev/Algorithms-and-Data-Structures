@@ -12,6 +12,7 @@ class AVLTree:
     def __init__(self):
         self.root = None
 
+    # Функция, которая возвращает глубину узла.
     def height(self, node):
         if not node:
             return 0
@@ -24,6 +25,7 @@ class AVLTree:
         if not node:
             return 0
         return self.height(node.left) - self.height(node.right)
+
 
     # Вспомогательная функция для добавления элемента, на вход поступает
     # значение добавляемого узла, а вернуть должен корневой узел, старый либа новый.
@@ -44,45 +46,95 @@ class AVLTree:
         # Вычисляем ту самую разницу.
         b = self.balance(root)
 
+
+
         # Смотрим сбалнсированно ли наше дерево и если оно будет не сбалансированным балансируем его.
-
-
 
         # Провека на необходимость малого левого вращения.
         if b == -2 and value > root.right.value:
             # Высота левого под дерева - высота правого под дерева = 2 и
             # высота правого под дерева правого под дерева больше или равно высоте левого под дерева правого под дерева.
-            return self.left_rotation(root)
+            return self.__left_rotation(root)
 
 
         # Проверека на необходмость большого левого вращения.
         if b == -2 and value < root.right.value:
-            return self.big_left_rotation(root)
-
+            return self.__big_left_rotation(root)
 
 
         # Провека на необходимость малого правого вращения.
         if b == 2 and value < root.left.value:
-            return self.right_rotation(root)
-
+            return self.__right_rotation(root)
 
 
         #Проверка на необходмость большого правого вращения
         if b == 2 and value > root.left.value:
-            return self.big_right_rotation(root)
+            return self.__big_right_rotation(root)
 
         return root
 
+
+    # Приватная функция для удаления узла.
     def __delete(self, root, value):
-            
+        # Если узел пуст, то нужно завершать программу, нето ошибка будет.
+        if not root:
+            return root
+
+        if value < root.value:
+            root.left = self.__delete(root.left, value)
+        elif value > root.value:
+            root.right = self.__delete(root.right, value)
+        else:
+            # 1. Случай
+            # Данные два условия проверка на то, что удаляемый узел - один, тоесть у него
+            # нет либо левого потомка, либо правого.
+            if not root.left:
+                return root.right
+            elif not root.right:
+                return root.left
+
+            # 2. Случай
+            # Если у удаляемого узла есть и левый и правый потомок.
+
+            # Ищем минимальный узел у правого поддерева у удаляемого узла.
+            temp = self.min_value_node(root.right)
+            # Меняем значением у удаляемого узла, на минимальный у temp.
+            root.value = temp.value
+            # Удаляем узел с минимальным значением, который мы искали.
+            root.right = self.__delete(root.right, temp.value)
+
+        # Если узел пуст, то нужно завершать программу, нето ошибка будет.
+        if not root:
+            return root
 
 
+        # Все что снизу балансировка, в общем уже рассмотрено в __insert
+
+        root.height = 1 + max(self.height(root.left), self.height(root.right))
+        b = self.balance(root)
+
+
+        if b == -2 and self.balance(root.right) <= 0:
+            return self.__left_rotation(root)
+
+        if b == 2 and self.balance(root.left) >= 0:
+            return self.__right_rotation(root)
+
+        if b == -2 and self.balance(root.right) > 0:
+            return self.__big_left_rotation(root)
+
+        if b == 2 and self.balance(root.left) < 0:
+            return self.__big_right_rotation(root)
+        return root
+
+
+    # Публичная функция удаления
     def delete_value(self, value):
         self.root = self.__delete(self.root, value)
 
 
     # Левое вращение
-    def left_rotation(self, a):
+    def __left_rotation(self, a):
         b = a.right
         C = b.left
 
@@ -97,7 +149,7 @@ class AVLTree:
         return b
 
     # Правое вращение
-    def right_rotation(self, b):
+    def __right_rotation(self, b):
         a = b.left
         C = a.right
 
@@ -112,7 +164,7 @@ class AVLTree:
         return a
 
     # Большое левое вращение
-    def big_left_rotation(self, a):
+    def __big_left_rotation(self, a):
         b = a.right
         c = b.left
         M = c.left
@@ -130,7 +182,7 @@ class AVLTree:
 
         return c
 
-    def big_right_rotation(self, a):
+    def __big_right_rotation(self, a):
         b = a.left
         c = b.right
         M = c.right
@@ -171,9 +223,6 @@ class AVLTree:
 
     def search_value(self, value):
         return self.__search(self.root, value)
-
-
-
 
 
 
