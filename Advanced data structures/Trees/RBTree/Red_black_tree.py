@@ -1,3 +1,6 @@
+import Red_black_tree_my_realization
+
+
 # Класс узла Красно - Черного Дерева.
 class RBNode:
     def __init__(self, value, color='red'):
@@ -33,6 +36,24 @@ class RBNode:
         if self.parent is None:
             return None
         return self.parent.get_sibling()
+
+
+    def __eq__(self, other):
+        if isinstance(other, RBNode):
+            def dfs(tree1, tree2):
+
+
+                if tree1.left and not tree2.left or tree1.right and not tree2.right:
+                    return False
+                elif not tree1.left and not tree2.left and not tree1.right and not tree2.right:
+                    return True
+
+                if tree1.value != tree2.value:
+                    return False
+
+
+
+                return dfs(tree1.left, tree2.left) and dfs(tree1.right, tree2.right)
 
 
 
@@ -174,6 +195,14 @@ class RedblackTree:
 
         left_child.right = node
         node.parent = left_child
+
+
+
+    def __eq__(self, other):
+        if isinstance(other, Red_black_tree_my_realization.RedblackTree):
+            return self.root == other.root
+        return NotImplemented
+
 
 
 RBTree = RedblackTree()

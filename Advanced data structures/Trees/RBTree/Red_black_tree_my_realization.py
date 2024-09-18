@@ -46,7 +46,8 @@ class RBNode:
                     return False
 
 
-                return dfs(tree1.left, tree2.left) and dfs(tree1.right and tree2.right)
+
+                return dfs(tree1.left, tree2.left) and dfs(tree1.right, tree2.right)
 
 
         return NotImplemented
@@ -224,7 +225,7 @@ class RedblackTree:
 
 
     def __eq__(self, other):
-        if isinstance(other, RedblackTree):
+        if isinstance(other, Red_black_tree.RedblackTree):
             return self.root == other.root
         return NotImplemented
 
