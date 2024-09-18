@@ -78,9 +78,9 @@ class RedblackTree:
                     new_node.get_grandparent().color = 'red'
                     self.__rotate_right(new_node.get_grandparent())
 
+
             # Если родитель является правым сыном дедушки.
             else:
-
                 # Получаем дядю элемента new_node.
                 uncle = new_node.get_uncle()
 
@@ -101,7 +101,7 @@ class RedblackTree:
         self.root.color = 'black'
 
 
-    # Обычна функция вставки, которая есть в Binary_Search_Tree.
+    # Обычная функция вставки, которая есть в Binary_Search_Tree.
     def insert(self, value):
         # Создаем узел с новым значением.
         new_node = RBNode(value)
