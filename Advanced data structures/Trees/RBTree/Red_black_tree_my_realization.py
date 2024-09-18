@@ -32,6 +32,25 @@ class RBNode:
             return None
         return self.parent.get_sibling()
 
+    def __eq__(self, other):
+        if isinstance(other, RBNode):
+            def dfs(tree1, tree2):
+
+
+                if tree1.left and not tree2.left or tree1.right and not tree2.right:
+                    return False
+                elif not tree1.left and not tree2.left and not tree1.right and not tree2.right:
+                    return True
+
+                if tree1.value != tree2.value:
+                    return False
+
+
+                return dfs(tree1.left, tree2.left) and dfs(tree1.right and tree2.right)
+
+
+        return NotImplemented
+
 
 class RedblackTree:
     # Конструктор класса.
@@ -204,6 +223,13 @@ class RedblackTree:
         self.__insert_fix(new_node)
 
 
+    def __eq__(self, other):
+        if isinstance(other, RedblackTree):
+            return self.root == other.root
+        return NotImplemented
+
+
+
 RBTree = RedblackTree()
 RBTree_True = Red_black_tree.RedblackTree()
 
@@ -212,5 +238,4 @@ for i in a:
     RBTree.insert(i)
     RBTree_True.insert(i)
 
-print()
 print(RBTree == RBTree_True)
