@@ -32,25 +32,6 @@ class RBNode:
             return None
         return self.parent.get_sibling()
 
-    def __eq__(self, other):
-        if isinstance(other, RBNode):
-            def dfs(tree1, tree2):
-
-
-                if tree1.left and not tree2.left or tree1.right and not tree2.right:
-                    return False
-                elif not tree1.left and not tree2.left and not tree1.right and not tree2.right:
-                    return True
-
-                if tree1.value != tree2.value:
-                    return False
-
-
-
-                return dfs(tree1.left, tree2.left) and dfs(tree1.right, tree2.right)
-
-
-        return NotImplemented
 
 
 class RedblackTree:
@@ -83,10 +64,19 @@ class RedblackTree:
 
                     if new_node == new_node.parent.right:
                         self.__left_first_rotation(new_node)
-                        self.__left_two_rotation(new_node)
+                        new_node = self.__left_two_rotation(new_node)
+
+                        if not new_node.parent:
+                            self.root = new_node
+
                     else:
                         new_node = new_node.parent
-                        self.__left_two_rotation(new_node)
+                        new_node = self.__left_two_rotation(new_node)
+
+                        if not new_node.parent:
+                            self.root = new_node
+                    break
+
 
             elif new_node.parent == new_node.get_grandparent().right:
 
@@ -94,17 +84,25 @@ class RedblackTree:
 
                 if uncle and uncle.color == 'red':
                     new_node.parent.color = 'black'
-                    uncle.color = 'red'
-                    new_node.get_grandparent().color = 'res'
-                    new_node = new_node.get_grandparent
+                    uncle.color = 'black'
+                    new_node.get_grandparent().color = 'red'
+                    new_node = new_node.get_grandparent()
                 else:
 
-                    if new_node == new_node.parent.right:
+                    if new_node == new_node.parent.left:
                         self.__right_first_rotation(new_node)
-                        self.__right_two_rotation(new_node)
+                        new_node = self.__right_two_rotation(new_node)
+
+                        if not new_node.parent:
+                            self.root = new_node
                     else:
                         new_node = new_node.parent
-                        self.__right_two_rotation(new_node)
+                        new_node = self.__right_two_rotation(new_node)
+
+                        if not new_node.parent:
+                            self.root = new_node
+                    break
+
 
 
 
@@ -126,15 +124,19 @@ class RedblackTree:
         y.left = g
         g.parent = y
 
-        if not grand_g:
+        if grand_g:
             if grand_g.right == g:
                 grand_g.right = y
             elif grand_g.left == g:
                 grand_g.left = y
             y.parent = grand_g
+        else:
+            y.parent = None
 
         y.color = 'black'
         g.color = 'red'
+
+        return y
 
 
     # 2.2
@@ -147,7 +149,7 @@ class RedblackTree:
 
         if b:
             x.right = y
-            y.parent = x
+        y.parent = x
 
         x.right = y
         y.parent = x
@@ -163,7 +165,7 @@ class RedblackTree:
 
         if b:
             b.parent = y
-            y.right = b
+        y.right = b
 
         x.left = y
         y.parent = x
@@ -191,9 +193,13 @@ class RedblackTree:
             elif grand_g.right == g:
                 grand_g.right = y
             y.parent = grand_g
+        else:
+            y.parent = None
 
         y.color = 'black'
         g.color = 'red'
+
+        return y
 
 
 
@@ -224,19 +230,158 @@ class RedblackTree:
         self.__insert_fix(new_node)
 
 
+    def search(self, value):
+        current = self.root
+        while current is not None:
+            if current.value == value:
+                return current
+            elif current.value < value:
+                current = current.right
+            else:
+                current = current.left
+        return None
+
+    # Функция для поиска минимального узла.
+    def find_min(self, node):
+        if node is None:
+            print('Дерево поиска минимального пусто')
+            return None
+
+        while node.left is not None:
+            node = node.left
+        return node
+
+
+
+    # Проверяем, если удаляемый узел черный
+    def __kch0(self, node):
+        pass
+
+
+
+    def deleted(self, value):
+        # С начала найдем узел, который необходимо удалить.
+        remove_node = self.search(value)
+        if remove_node is None:
+            print('такого узла в дереве нет')
+            return
+
+        if remove_node.parent is None:
+            self.root = None
+            return
+
+        # Рассмотрим ситуация, что удаляемый элемент красный.
+        if remove_node.color == 'red':
+
+
+            # Рассмотрим ситуация, что у удаляемого элемента нет детей(К0)
+            if remove_node.left is None and remove_node.right is None:
+                # Удаляемый узел левый сын своего отца.
+                if remove_node == remove_node.parent.left:
+                    remove_node.parent.left = None
+                else:
+                    remove_node.parent.right = None
+                return
+
+            # Рассмотрим ситуацию, что у удаляемого элемента есть оба сына(К2)
+            elif remove_node.left and remove_node.right:
+                new_node = self.find_min(remove_node.right)
+                remove_node.value = new_node.value
+                self.deleted(new_node)
+                return
+
+            # Рассмотрим случай, когда у удаляемого элемент есть ровно один сын(К1)
+            # дело в том, что это невозможно
+
+
+        # Удаляемый элемент черный
+        if remove_node.color == 'black':
+
+            # Случай когда у удаляемого элемента нет детей(Ч0)
+            if remove_node.left is None and remove_node.right is None:
+
+                # Мне нужна сторона для рассмотрения этого случая.
+                if remove_node == remove_node.parent.right:
+
+                    # Рассмотрим случай - Родитель красный, Левый ребенок черный с черными внуками(КЧ1)
+                    y = remove_node.parent.left
+                    if y.left != 'red' and y.right != 'red' and y.parent.color == 'red' and y.color=='red':
+                        remove_node.parent.color = 'black'
+                        y.color = 'red'
+                        remove_node.parent.right = None
+                        return
+
+                    # Рассмотрим случай - Родитель красный, левый ребенок черный с левым красным внуком(ЧК2).
+                    elif remove_node.parent.color == 'red' and y.color=='black' and y.left.color=='red':
+                        c = y.right
+                        g = y.parent
+                        grand_g = g.parent
+
+                        g.left = c
+                        y.right = g
+                        g.parent = y
+
+                        if grand_g:
+                            if g == grand_g.left:
+                                grand_g.left = y
+                            elif g == grand_g.right:
+                                grand_g.right = y
+                            y.parent = grand_g
+                        else:
+                            y.parent = None
+                            self.root = y
+
+                        y.left.color = 'black'
+
+                        # ТУТ УДАЛИТЬ ЗАБЫЛ!!!!!!!!!
+
+                    # Родитель черный, левый сын красный, у правого внука черные правнуки(ЧК3).
+                    elif remove_node.parent.color == 'black' and y.color == 'red' and y.right.left != 'red' and y.right.right != 'red':
+                        pass
+
+
+
+            # Случай, когда у удаляемого элемента есть оба сына(Ч2)
+            elif remove_node.left and remove_node.right:
+                new_node = self.find_min(remove_node.right)
+                remove_node.value = new_node.value
+                self.deleted(new_node)
+                return
+
+            # Случай, когда у удаляемого элемента, есть ровно один сын(Ч1)
+            else:
+                if remove_node.left:
+                    remove_node.value = remove_node.left.value
+                    remove_node.left = None
+                    return
+                else:
+                    remove_node.value = remove_node.right.value
+                    remove_node.right = None
+                    return
+
+
+
     def __eq__(self, other):
-        if isinstance(other, Red_black_tree.RedblackTree):
-            return self.root == other.root
-        return NotImplemented
+        if other is None:
+            return False
+        return self._compare_trees(self.root, other.root)
+
+    def _compare_trees(self, node1, node2):
+        # Если оба узла None, то они равны
+        if node1 is None and node2 is None:
+            return True
+
+        # Если только один из узлов None, то деревья не равны
+        if node1 is None or node2 is None:
+            return False
+
+        # Сравниваем ключи и цвета узлов
+        if node1.value != node2.value or node1.color != node2.color:
+            return False
+
+        # Рекурсивно сравниваем левое и правое поддеревья
+        return self._compare_trees(node1.left, node2.left) and \
+            self._compare_trees(node1.right, node2.right)
 
 
 
-RBTree = RedblackTree()
-RBTree_True = Red_black_tree.RedblackTree()
-
-a = [20, 30, 10, 5, 1]
-for i in a:
-    RBTree.insert(i)
-    RBTree_True.insert(i)
-
-print(RBTree == RBTree_True)

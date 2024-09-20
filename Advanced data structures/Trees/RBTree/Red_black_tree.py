@@ -1,4 +1,4 @@
-import Red_black_tree_my_realization
+
 
 
 # Класс узла Красно - Черного Дерева.
@@ -37,23 +37,6 @@ class RBNode:
             return None
         return self.parent.get_sibling()
 
-
-    def __eq__(self, other):
-        if isinstance(other, RBNode):
-            def dfs(tree1, tree2):
-
-
-                if tree1.left and not tree2.left or tree1.right and not tree2.right:
-                    return False
-                elif not tree1.left and not tree2.left and not tree1.right and not tree2.right:
-                    return True
-
-                if tree1.value != tree2.value:
-                    return False
-
-
-
-                return dfs(tree1.left, tree2.left) and dfs(tree1.right, tree2.right)
 
 
 
@@ -197,17 +180,91 @@ class RedblackTree:
         node.parent = left_child
 
 
+    def search(self, value):
+        curr_node = self.root
+        while curr_node is not None:
+            if value == curr_node.value:
+                return curr_node
+            elif value < curr_node.value:
+                curr_node = curr_node.left
+            else:
+                curr_node = curr_node.right
+        return None
+    def delete(self, value):
+        node_to_remove = self.search(value)
 
-    def __eq__(self, other):
-        if isinstance(other, Red_black_tree_my_realization.RedblackTree):
-            return self.root == other.root
-        return NotImplemented
+        if node_to_remove is None:
+            return
+
+        if node_to_remove.left is None or node_to_remove.right is None:
+            self._replace_node(node_to_remove, node_to_remove.left or node_to_remove.right)
+        else:
+            successor = self._find_min(node_to_remove.right)
+            node_to_remove.value = successor.value
+            self._replace_node(successor, successor.right)
+
+        self.delete_fix(node_to_remove)
+
+    def delete_fix(self, x):
+        while x != self.root and x.color == 'black':
+            if x == x.parent.left:
+                sibling = x.sibling()
+                if sibling.color == 'red':
+                    sibling.color = 'black'
+                    x.parent.color = 'red'
+                    self.__rotate_left(x.parent)
+                    sibling = x.sibling()
+                if (sibling.left is None or sibling.left.color == 'black') and (sibling.right is None or sibling.right.color == 'black'):
+                    sibling.color = 'red'
+                    x = x.parent
+                else:
+                    if sibling.right is None or sibling.right.color == 'black':
+                        sibling.left.color = 'black'
+                        sibling.color = 'red'
+                        self.__rotate_right(sibling)
+                        sibling = x.sibling()
+                    sibling.color = x.parent.color
+                    x.parent.color = 'black'
+                    if sibling.right:
+                        sibling.right.color = 'black'
+                    self.__rotate_left(x.parent)
+                    x = self.root
+            else:
+                sibling = x.sibling()
+                if sibling.color == 'red':
+                    sibling.color = 'black'
+                    x.parent.color = 'red'
+                    self.__rotate_right(x.parent)
+                    sibling = x.sibling()
+                if (sibling.left is None or sibling.left.color == 'black') and (sibling.right is None or sibling.right.color == 'black'):
+                    sibling.color = 'red'
+                    x = x.parent
+                else:
+                    if sibling.left is None or sibling.left.color == 'black':
+                        sibling.right.color = 'black'
+                        sibling.color = 'red'
+                        self.__rotate_left(sibling)
+                        sibling = x.sibling()
+                    sibling.color = x.parent.color
+                    x.parent.color = 'black'
+                    if sibling.left:
+                        sibling.left.color = 'black'
+                    self.__rotate_right(x.parent)
+                    x = self.root
+        x.color = 'black'
 
 
 
-RBTree = RedblackTree()
-RBTree.insert(20)
-RBTree.insert(30)
-RBTree.insert(10)
-RBTree.insert(5)
-RBTree.insert(1)
+
+
+
+# RBTree = RedblackTree()
+# RBTree.insert(43)
+# RBTree.insert(2)
+# RBTree.insert(3)
+# RBTree.insert(4)
+# RBTree.insert(5)
+# RBTree.insert(15)
+# RBTree.insert(76)
+# RBTree.insert(3)
+# RBTree.insert(8)
