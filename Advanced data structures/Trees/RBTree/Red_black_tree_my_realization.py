@@ -230,8 +230,8 @@ class RedblackTree:
         self.__insert_fix(new_node)
 
 
-    def search(self, value):
-        current = self.root
+    def search(self, value, root):
+        current = root
         while current is not None:
             if current.value == value:
                 return current
@@ -241,123 +241,165 @@ class RedblackTree:
                 current = current.left
         return None
 
+
     # Функция для поиска минимального узла.
-    def find_min(self, node):
+    def find_max(self, node):
         if node is None:
             print('Дерево поиска минимального пусто')
             return None
 
-        while node.left is not None:
-            node = node.left
+        while node.right is not None:
+            node = node.right
         return node
 
 
 
-    # Проверяем, если удаляемый узел черный
-    def __kch0(self, node):
-        pass
-
-
-
-    def deleted(self, value):
-        # С начала найдем узел, который необходимо удалить.
-        remove_node = self.search(value)
+    def deleted(self, root, value):
+        remove_node = self.search(value, root)
         if remove_node is None:
-            print('такого узла в дереве нет')
-            return
+            print('Нет такого узла в дереве')
+            return None
 
-        if remove_node.parent is None:
-            self.root = None
-            return
-
-        # Рассмотрим ситуация, что удаляемый элемент красный.
-        if remove_node.color == 'red':
-
-
-            # Рассмотрим ситуация, что у удаляемого элемента нет детей(К0)
-            if remove_node.left is None and remove_node.right is None:
-                # Удаляемый узел левый сын своего отца.
+        # 1)
+        if remove_node.color=='red' and not remove_node.left and not remove_node.right:
+            if remove_node.parent:
                 if remove_node == remove_node.parent.left:
                     remove_node.parent.left = None
                 else:
                     remove_node.parent.right = None
-                return
-
-            # Рассмотрим ситуацию, что у удаляемого элемента есть оба сына(К2)
-            elif remove_node.left and remove_node.right:
-                new_node = self.find_min(remove_node.right)
-                remove_node.value = new_node.value
-                self.deleted(new_node)
-                return
-
-            # Рассмотрим случай, когда у удаляемого элемент есть ровно один сын(К1)
-            # дело в том, что это невозможно
-
-
-        # Удаляемый элемент черный
-        if remove_node.color == 'black':
-
-            # Случай когда у удаляемого элемента нет детей(Ч0)
-            if remove_node.left is None and remove_node.right is None:
-
-                # Мне нужна сторона для рассмотрения этого случая.
-                if remove_node == remove_node.parent.right:
-
-                    # Рассмотрим случай - Родитель красный, Левый ребенок черный с черными внуками(КЧ1)
-                    y = remove_node.parent.left
-                    if y.left != 'red' and y.right != 'red' and y.parent.color == 'red' and y.color=='red':
-                        remove_node.parent.color = 'black'
-                        y.color = 'red'
-                        remove_node.parent.right = None
-                        return
-
-                    # Рассмотрим случай - Родитель красный, левый ребенок черный с левым красным внуком(ЧК2).
-                    elif remove_node.parent.color == 'red' and y.color=='black' and y.left.color=='red':
-                        c = y.right
-                        g = y.parent
-                        grand_g = g.parent
-
-                        g.left = c
-                        y.right = g
-                        g.parent = y
-
-                        if grand_g:
-                            if g == grand_g.left:
-                                grand_g.left = y
-                            elif g == grand_g.right:
-                                grand_g.right = y
-                            y.parent = grand_g
-                        else:
-                            y.parent = None
-                            self.root = y
-
-                        y.left.color = 'black'
-
-                        # ТУТ УДАЛИТЬ ЗАБЫЛ!!!!!!!!!
-
-                    # Родитель черный, левый сын красный, у правого внука черные правнуки(ЧК3).
-                    elif remove_node.parent.color == 'black' and y.color == 'red' and y.right.left != 'red' and y.right.right != 'red':
-                        pass
-
-
-
-            # Случай, когда у удаляемого элемента есть оба сына(Ч2)
-            elif remove_node.left and remove_node.right:
-                new_node = self.find_min(remove_node.right)
-                remove_node.value = new_node.value
-                self.deleted(new_node)
-                return
-
-            # Случай, когда у удаляемого элемента, есть ровно один сын(Ч1)
             else:
-                if remove_node.left:
-                    remove_node.value = remove_node.left.value
-                    remove_node.left = None
-                    return
+                self.root = None
+
+        # 3)
+        elif ((remove_node.left.color=='red' and not remove_node.right) or (remove_node.right.color=='red' and not remove_node.left) and (remove_node.color == 'black')):
+            if remove_node.left:
+                remove_node.value = remove_node.left.value
+                remove_node.left = None
+            else:
+                remove_node.value = remove_node.right.value
+                remove_node.right = None
+
+
+        else:
+
+            current = self.root
+            while current:
+                if current.value == value:
+                    break
+                if current.value > value:
+                    current = current.left
                 else:
-                    remove_node.value = remove_node.right.value
-                    remove_node.right = None
+                    current = current.right
+
+            # Удаляемый красный, с одним ребенок не может существовать.
+
+            # Удаляемый красный с двумя детьми.
+            if current.color == 'red' and current.left and current.right:
+                new_for_del = self.find_max(root)
+                current.value = new_for_del.value
+                self.deleted(current.left, new_for_del.value)
+                return
+
+
+            elif current.color == 'black' and current.left and current.right:
+                current.value = self.find_max(root.right)
+                self.deleted(current.left, current.value)
+                return
+
+
+            if current.color == 'black' and current.left is None and current.right is None:
+                g = current.parent
+                grand_g = g.parent
+                s = g.left
+                a_1 = s.left
+                b_1 = s.right
+
+                if g.color == 'red' and s.color == 'black' and a_1.color != 'red' and b_1.color != 'red':
+                    g.color = 'black'
+                    s.color = 'red'
+                    g.right = None
                     return
+
+                elif g.color=='red' and s.color=='black' and a_1.color=='red':
+
+                    s.right = g
+                    g.parent = s
+                    g.left = b_1
+                    b_1.parent = g
+                    a_1.color = 'black'
+                    g.right = None
+
+                    if grand_g:
+                        if g == grand_g.left:
+                            grand_g.left = s
+                        else:
+                            grand_g.right = s
+                        s.parent = grand_g
+                    else:
+                        s.color = 'black'
+                        self.root = s
+                    return
+
+                # ЧК3 — родитель чёрный, левый сын красный, у правого внука чёрные правнуки
+                elif g.color == 'black' and s.color == 'red' and b_1.left.color != 'red' and b_1.right.color != 'red':
+                    s.right = g
+                    g.parent = s
+                    g.left = b_1
+                    b_1.parent = g
+                    b_1.color = 'red'
+                    s.color = 'black'
+                    g.right = None
+
+                    if grand_g:
+                        if g == grand_g.left:
+                            grand_g.left = s
+                        else:
+                            grand_g.right = s
+                        s.parent = grand_g
+                    else:
+                        self.root = s
+
+
+                    return
+
+                # ЧК4 — родитель чёрны й, левый сын красный, у правого внука левый правнук красный
+                elif g.color == 'black' and s.color == 'red' and b_1.left.color == 'red':
+                    c = b_1.right
+                    b = b_1.left
+
+                    a = g.value
+                    g.value = b_1.value
+                    current.value = a
+
+                    current.left = c
+                    c.parent = current
+                    s.right = b
+                    b.parent = s
+                    b.color = 'black'
+
+                    return
+
+                # ЧЧ5 — родитель чёрный, левый сын чёрный с правым красным внуком.
+                elif g.color=='black' and s.color == 'black' and b_1.color=='red':
+                    b = b_1.left
+                    c = b_1.right
+                    s.right = b
+                    b.parent = s
+
+                    aaa = g.value
+                    g.value = b_1.value
+                    current.value = aaa
+                    current.left = c
+                    c.parent = current
+
+                    return
+
+                # ЧЧ6 — родитель чёрный, левый сын чёрный, его внуки тоже чёрные
+                elif g.color == 'black' and s.color == 'black' and a_1.color != 'red' and b_1.color != 'red':
+                    s.color = 'red'
+                    g.right = None
+                    # ??????????
+
 
 
 
@@ -365,7 +407,6 @@ class RedblackTree:
         if other is None:
             return False
         return self._compare_trees(self.root, other.root)
-
     def _compare_trees(self, node1, node2):
         # Если оба узла None, то они равны
         if node1 is None and node2 is None:
@@ -382,6 +423,17 @@ class RedblackTree:
         # Рекурсивно сравниваем левое и правое поддеревья
         return self._compare_trees(node1.left, node2.left) and \
             self._compare_trees(node1.right, node2.right)
+
+tree = RedblackTree()
+tree.insert(20)
+tree.insert(10)
+tree.insert(30)
+tree.insert(25)
+tree.insert(35)
+
+tree.deleted(30)
+
+print()
 
 
 
