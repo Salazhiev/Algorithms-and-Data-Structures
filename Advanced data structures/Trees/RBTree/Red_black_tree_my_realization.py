@@ -1,4 +1,5 @@
 import Red_black_tree
+import random
 
 class RBNode:
     def __init__(self, value, color='red'):
@@ -230,7 +231,7 @@ class RedblackTree:
         self.__insert_fix(new_node)
 
 
-    def search(self, value, root):
+    def search(self, root, value):
         current = root
         while current is not None:
             if current.value == value:
@@ -242,7 +243,7 @@ class RedblackTree:
         return None
 
 
-    # Функция для поиска минимального узла.
+    # Функция для поиска максимального узла.
     def find_max(self, node):
         if node is None:
             print('Дерево поиска минимального пусто')
@@ -252,154 +253,528 @@ class RedblackTree:
             node = node.right
         return node
 
-
-
-    def deleted(self, root, value):
-        remove_node = self.search(value, root)
+    def deleted(self, value):
+        remove_node = self.search(self.root, value)
         if remove_node is None:
-            print('Нет такого узла в дереве')
-            return None
+            print('Нет такого узла')
+            return
 
-        # 1)
-        if remove_node.color=='red' and not remove_node.left and not remove_node.right:
+        if remove_node.left and remove_node.right:
+            new_remove_node = self.find_max(remove_node.left)
+            remove_node.value = new_remove_node.value
+            remove_node = new_remove_node
+
+        # 1) РАБОТАЕТ!!!
+        if remove_node.color == 'red' and not remove_node.left and not remove_node.right:
             if remove_node.parent:
                 if remove_node == remove_node.parent.left:
-                    remove_node.parent.left = None
+                    remove_node.left = None
                 else:
-                    remove_node.parent.right = None
-            else:
-                self.root = None
+                    remove_node.right = None
+            return
+
+
 
         # 3)
-        elif ((remove_node.left.color=='red' and not remove_node.right) or (remove_node.right.color=='red' and not remove_node.left) and (remove_node.color == 'black')):
-            if remove_node.left:
-                remove_node.value = remove_node.left.value
-                remove_node.left = None
+        elif remove_node.color == 'black' and remove_node.left and remove_node.left.color == 'red' and remove_node.right == None:
+            remove_node.value = remove_node.left.value
+            remove_node.left = None
+            return
+        elif remove_node.color == 'black' and remove_node.right and remove_node.right.color == 'red' and remove_node.left == None:
+            remove_node.value = remove_node.right.value
+            remove_node.right = None
+            return
+
+        # 2)
+        if remove_node.parent:
+            if remove_node.parent.right == remove_node:
+                self.__balanced_for_deleted_right(remove_node, True)
             else:
-                remove_node.value = remove_node.right.value
-                remove_node.right = None
+                self.__balanced_for_deleted_left(remove_node, True)
 
 
-        else:
 
-            current = self.root
-            while current:
-                if current.value == value:
-                    break
-                if current.value > value:
-                    current = current.left
+    def __balanced_for_deleted_right(self, remove_node, flag):
+        a = remove_node.parent
+        b = a.left
+        c = b.right
+        r = b.left
+        # 2.1.1
+        if a and a.color=='red' and b and c and c.color == 'red': # РАБОТАЕТ!!!
+            if a:
+                g = a.parent
+
+            B = c.left
+            C = c.right
+
+            c.left = b
+            b.parent = c
+
+            if g:
+                if a == g.left:
+                    g.left = c
                 else:
-                    current = current.right
+                    g.right = c
+                c.parent = g
+            else:
+                c.color = 'black'
+                self.root = c
 
-            # Удаляемый красный, с одним ребенок не может существовать.
+            c.right = a
+            a.parent = c
+            if flag:
+                a.right = None
+            a.left = C
+            if C:
+                C.parent = a
 
-            # Удаляемый красный с двумя детьми.
-            if current.color == 'red' and current.left and current.right:
-                new_for_del = self.find_max(root)
-                current.value = new_for_del.value
-                self.deleted(current.left, new_for_del.value)
+            b.right = B
+            if B:
+                B.parent = b
+
+            a.color='black'
+
+            return
+
+        # 2.1.1
+        elif a and a.color=='red' and b and c and r.color == 'red':
+            if a:
+                g = a.parent
+
+            b.right = a
+            a.parent = b
+
+            a.left = c
+            if c:
+                c.parent = a
+
+            if flag:
+                a.right = None
+
+            if g:
+                if a == g.left:
+                    g.left = b
+                else:
+                    g.right = b
+                b.parent = g
+            else:
+                b.color = 'black'
+                self.root = b
+
+            return
+
+        # 2.1.2
+        elif a and a.color == 'red' and b:
+            b.color = 'red'
+            a.color = 'black'
+            if flag:
+                a.right = None
+            return
+
+        # 2.2.1
+        elif a and a.color == 'black' and b and b.color=='red':
+
+            g = a.parent
+
+            # 2.2.1.1
+            if c and c.color == 'black':
+                d_1 = c.left
+                d_2 = c.right
+                if d_1 and d_1.color=='red':
+                    c.left = b
+                    b.parent = c
+
+                    c.right = a
+                    a.parent = c
+                    a.left = d_2
+                    if flag:
+                        a.right = None
+                    if d_2:
+                        d_2.parent = a
+
+                    if g:
+                        if a == g.left:
+                            g.left = d_1
+                        else:
+                            g.right = d_1
+                        d_1.parent = g
+                    else:
+                        self.root = d_1
+
+
+
+                    b.right = d_1
+                    d_1.parent = b
+                    d_1.color = 'black'
+                elif d_2 and d_2.color=='red':
+                    d_2.left = b
+                    b.parent = d_2
+
+                    d_2.right = a
+                    a.parent = d_2
+
+                    C = d_2.left
+                    e = d_2.right
+
+                    if g:
+                        if a == g.left:
+                            g.left = d_2
+                        else:
+                            g.right = d_2
+                        d_2.parent = g
+                    else:
+                        self.root = d_2
+
+
+                    a.left = e
+                    if e:
+                        e.parent = a
+
+                    if flag:
+                        a.right = None
+
+                    c.right = C
+                    if C:
+                        C.parent = c
+                    d_2.color = 'black'
+
+
+                # 2.2.1.2
+                else:
+                    b.right = a
+                    a.parent = b
+                    a.left = c
+                    if c:
+                        c.parent = a
+
+                    if flag:
+                        a.right = None
+
+
+                    c.color='red'
+                    b.color='black'
+
+                    if g:
+                        if a==g.left:
+                            g.left = b
+                        else:
+                            g.right = b
+
+                        b.parent = g
+                    else:
+                        self.root = b
                 return
 
+        elif a and a.color=='black' and b and b.color=='black':
 
-            elif current.color == 'black' and current.left and current.right:
-                current.value = self.find_max(root.right)
-                self.deleted(current.left, current.value)
+            b_1 = b.left
+            b_2 = b.right
+            g = a.parent
+
+            # 2.2.2.1
+            if b_2 and b_2=='red':
+                b_2_1 = b_2.left
+                b_2_2 = b_2.right
+
+                b_2.left = b
+                b.parent = b_2
+
+                b_2.right = a
+                a.parent = b_2
+                a.left = b_2_2
+                if b_2_2:
+                    b_2_2.parent = a
+
+                b.right = b_2_1
+                if b_2_1:
+                    b_2_1.parent = b
+
+                if g:
+                    if a==g.left:
+                        g.left = b_2
+                    else:
+                        g.right = b_2
+                    b_2.parent = g
+                else:
+                    self.root = b_2
+
+                if flag:
+                    a.right = None
+                b_2.color = 'black'
+
+            elif b_1 and b_1=='red':
+
+                b.right = a
+                a.parent = b
+
+                a.left = b_2
+                if b_2:
+                    b_2.parent = a
+
+
+                if g:
+                    if a == g.left:
+                        g.left = b
+                    else:
+                        g.right = b
+                    b.parent = g
+                else:
+                    self.root = b
+
+                if flag:
+                    a.right = None
+                b_1.color = 'black'
+
+
+            # 2.2.2.2
+            else:
+                b.color = 'red'
+                if a.parent:
+                    if a == a.prent.right:
+                        self.__balanced_for_deleted_right(a, False)
+                    else:
+                        self.__balanced_for_deleted_left(a, False)
+            return
+
+    def __balanced_for_deleted_left(self, remove_node, flag):
+        a = remove_node.parent
+        b = a.right
+        c = b.left
+        r = b.right
+        # 2.1.1
+        if a and a.color=='red' and b and c and c.color == 'red':
+            if a:
+                g = a.parent
+
+            B = c.right
+            C = c.left
+
+            c.right = b
+            b.parent = c
+
+            if g:
+                if a == g.right:
+                    g.right = c
+                else:
+                    g.left = c
+                c.parent = g
+            else:
+                c.color = 'black'
+                self.root = c
+
+            c.left = a
+            a.parent = c
+            if flag:
+                a.left = None
+            a.right = C
+            if C:
+                C.parent = a
+
+            b.left = B
+            if B:
+                B.parent = b
+
+            return
+
+        # 2.1.1
+        elif a and a.color=='red' and b and r and r.color == 'red': # РАБОТАЕТ!!!
+            if a:
+                g = a.parent
+
+            b.left = a
+            a.parent = b
+
+            a.right = c
+            if c:
+                c.parent = a
+
+            if flag:
+                a.left = None
+
+            if g:
+                if a == g.right:
+                    g.right = b
+                else:
+                    g.left = b
+                b.parent = g
+            else:
+                b.color = 'black'
+                self.root = b
+
+            return
+
+        # 2.1.2
+        elif a and a.color == 'red' and b:
+            b.color = 'red'
+            a.color = 'black'
+            if flag:
+                a.left = None
+            return
+
+        # 2.2.1
+        elif a and a.color == 'black' and b and b.color=='red':
+
+            g = a.parent
+
+            # 2.2.1.1
+            if c and c.color == 'black':
+                d_1 = c.right
+                d_2 = c.left
+                if d_1 and d_1.color=='red':
+                    c.right = b
+                    b.parent = c
+
+                    c.left = a
+                    a.parent = c
+                    a.right = d_2
+                    if flag:
+                        a.left = None
+                    if d_2:
+                        d_2.parent = a
+
+                    if g:
+                        if a == g.right:
+                            g.right = d_1
+                        else:
+                            g.left = d_1
+                        d_1.parent = g
+                    else:
+                        self.root = d_1
+
+
+
+                    b.left = d_1
+                    d_1.parent = b
+                    d_1.color = 'black'
+                elif d_2 and d_2.color=='red':
+                    d_2.right = b
+                    b.parent = d_2
+
+                    d_2.left = a
+                    a.parent = d_2
+
+                    C = d_2.right
+                    e = d_2.left
+
+                    if g:
+                        if a == g.right:
+                            g.right = d_2
+                        else:
+                            g.left = d_2
+                        d_2.parent = g
+                    else:
+                        self.root = d_2
+
+
+                    a.right = e
+                    if e:
+                        e.parent = a
+
+                    if flag:
+                        a.left = None
+
+                    c.left = C
+                    if C:
+                        C.parent = c
+                    d_2.color = 'black'
+
+
+                # 2.2.1.2
+                else:
+                    b.left = a
+                    a.parent = b
+                    a.right = c
+                    if c:
+                        c.parent = a
+
+                    if flag:
+                        a.left = None
+
+
+                    c.color='red'
+                    b.color='black'
+
+                    if g:
+                        if a==g.right:
+                            g.right = b
+                        else:
+                            g.left = b
+
+                        b.parent = g
+                    else:
+                        self.root = b
                 return
 
+        elif a and a.color=='black' and b and b.color=='black':
 
-            if current.color == 'black' and current.left is None and current.right is None:
-                g = current.parent
-                grand_g = g.parent
-                s = g.left
-                a_1 = s.left
-                b_1 = s.right
+            b_1 = b.right
+            b_2 = b.left
+            g = a.parent
 
-                if g.color == 'red' and s.color == 'black' and a_1.color != 'red' and b_1.color != 'red':
-                    g.color = 'black'
-                    s.color = 'red'
-                    g.right = None
-                    return
+            # 2.2.2.1
+            if b_2 and b_2=='red':
+                b_2_1 = b_2.right
+                b_2_2 = b_2.left
 
-                elif g.color=='red' and s.color=='black' and a_1.color=='red':
+                b_2.right = b
+                b.parent = b_2
 
-                    s.right = g
-                    g.parent = s
-                    g.left = b_1
-                    b_1.parent = g
-                    a_1.color = 'black'
-                    g.right = None
+                b_2.left = a
+                a.parent = b_2
+                a.right = b_2_2
+                if b_2_2:
+                    b_2_2.parent = a
 
-                    if grand_g:
-                        if g == grand_g.left:
-                            grand_g.left = s
-                        else:
-                            grand_g.right = s
-                        s.parent = grand_g
+                b.left = b_2_1
+                if b_2_1:
+                    b_2_1.parent = b
+
+                if g:
+                    if a==g.right:
+                        g.right = b_2
                     else:
-                        s.color = 'black'
-                        self.root = s
-                    return
+                        g.left = b_2
+                    b_2.parent = g
+                else:
+                    self.root = b_2
 
-                # ЧК3 — родитель чёрный, левый сын красный, у правого внука чёрные правнуки
-                elif g.color == 'black' and s.color == 'red' and b_1.left.color != 'red' and b_1.right.color != 'red':
-                    s.right = g
-                    g.parent = s
-                    g.left = b_1
-                    b_1.parent = g
-                    b_1.color = 'red'
-                    s.color = 'black'
-                    g.right = None
+                if flag:
+                    a.left = None
+                b_2.color = 'black'
 
-                    if grand_g:
-                        if g == grand_g.left:
-                            grand_g.left = s
-                        else:
-                            grand_g.right = s
-                        s.parent = grand_g
+            elif b_1 and b_1=='red':
+
+                b.left = a
+                a.parent = b
+
+                a.right = b_2
+                if b_2:
+                    b_2.parent = a
+
+
+                if g:
+                    if a == g.right:
+                        g.right = b
                     else:
-                        self.root = s
+                        g.left = b
+                    b.parent = g
+                else:
+                    self.root = b
+
+                if flag:
+                    a.left = None
+                b_1.color = 'black'
 
 
-                    return
-
-                # ЧК4 — родитель чёрны й, левый сын красный, у правого внука левый правнук красный
-                elif g.color == 'black' and s.color == 'red' and b_1.left.color == 'red':
-                    c = b_1.right
-                    b = b_1.left
-
-                    a = g.value
-                    g.value = b_1.value
-                    current.value = a
-
-                    current.left = c
-                    c.parent = current
-                    s.right = b
-                    b.parent = s
-                    b.color = 'black'
-
-                    return
-
-                # ЧЧ5 — родитель чёрный, левый сын чёрный с правым красным внуком.
-                elif g.color=='black' and s.color == 'black' and b_1.color=='red':
-                    b = b_1.left
-                    c = b_1.right
-                    s.right = b
-                    b.parent = s
-
-                    aaa = g.value
-                    g.value = b_1.value
-                    current.value = aaa
-                    current.left = c
-                    c.parent = current
-
-                    return
-
-                # ЧЧ6 — родитель чёрный, левый сын чёрный, его внуки тоже чёрные
-                elif g.color == 'black' and s.color == 'black' and a_1.color != 'red' and b_1.color != 'red':
-                    s.color = 'red'
-                    g.right = None
-                    # ??????????
-
+            # 2.2.2.2
+            else:
+                b.color = 'red'
+                if a.aprent:
+                    if a == a.prent.right:
+                        self.__balanced_for_deleted_right(a, False)
+                    else:
+                        self.__balanced_for_deleted_left(a, False)
+            return
 
 
 
@@ -424,16 +799,22 @@ class RedblackTree:
         return self._compare_trees(node1.left, node2.left) and \
             self._compare_trees(node1.right, node2.right)
 
-tree = RedblackTree()
-tree.insert(20)
-tree.insert(10)
-tree.insert(30)
-tree.insert(25)
-tree.insert(35)
 
-tree.deleted(30)
+tree_my = RedblackTree()
+tree_true = Red_black_tree.RedBlackTree()
+
+a = [45, 32, 72, 70, 28, 21, 56, 16]
+
+for i in a:
+    tree_my.insert(i)
+    tree_true.insert(i)
+
+print(end='')
+
+z = a[0]
+tree_true.delete(z)
+tree_my.deleted(z)
+print(z)
 
 print()
-
-
 

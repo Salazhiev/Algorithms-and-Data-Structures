@@ -1,113 +1,56 @@
-
-
-
-# Класс узла Красно - Черного Дерева.
+# class to implement node of RB Tree
 class RBNode:
+    # cnostructor
     def __init__(self, value, color='red'):
         self.value = value
-        # Цвет рассматриваемого узла.
         self.color = color
         self.left = None
         self.right = None
-        # Родительский узел рассматриваемого узла.
         self.parent = None
 
-
-    # Функция для получения прародителя узла.
-    def get_grandparent(self):
+    # function to get the grandparent of node
+    def grandparent(self):
         if self.parent is None:
             return None
         return self.parent.parent
 
-
-    # Функця для получения брат(тоесть брат по одному родителю - отцу).
-    def get_sibling(self):
+    # function to get the sibling of node
+    def sibling(self):
         if self.parent is None:
             return None
-
-        # Если будет стуация, что у меня нет брата, то функция вернет None значением.
         if self == self.parent.left:
             return self.parent.right
         return self.parent.left
 
-
-    # Функция для полученя дяди, тоесть брата моего отца.
-    def get_uncle(self):
+    # function to get the uncle of node
+    def uncle(self):
         if self.parent is None:
             return None
-        return self.parent.get_sibling()
+        return self.parent.sibling()
+
+# function to implement Red Black Tree
 
 
-
-
-# Класс самого дерева, с красно-черными узлами.
-class RedblackTree:
+class RedBlackTree:
+    # constructor to initialize the RB tree
     def __init__(self):
         self.root = None
 
-
-
-    # Реализация вставки в дерево. Состоит из двух частей, стандартная вставка, как и в
-    # обычное BST-дерево, а после уже происходит исправление свойства Red-Black, после вставки
-    # мы могли нарушить одно из двух свойств:
-    #       1 - Ни один красный узел, не может иметь красного потомка.
-    #       2 - Все пути от узла до дочерних листьев должны содержать одинаковое количество черн. Узлов.
-
-
-    # insert_fix - функция для исправления свойств красно-черного дерева после вставки.
-    def __insert_fix(self, new_node):
-        # Насколько я понял, добавляемый узел всегда красный.
-
-        # Пока у new_node есть два непрерывных красных узла, нам нужно исправлять дерево RB.
-        while new_node.parent and new_node.parent.color == 'red':
-
-            # Если родитель является левым сыном дедушки.
-            if new_node.parent == new_node.get_grandparent().left:
-
-                # Получаем дядю элемента new_node.
-                uncle = new_node.get_uncle()
-
-                # Если дядя красный.
-                if uncle and uncle.color == 'red':
-                    new_node.parent.color = 'black'
-                    uncle.color = 'black'
-                    new_node.get_grandparent().color = 'red'
-                    new_node = new_node.get_grandparent()
-                # Если дядя черный.
-                else:
-                    if new_node == new_node.parent.right:
-                        new_node = new_node.parent
-                        self.__rotate_left(new_node)
-                    new_node.parent.color = 'black'
-                    new_node.get_grandparent().color = 'red'
-                    self.__rotate_right(new_node.get_grandparent())
-
-
-            # Если родитель является правым сыном дедушки.
+    # function to search a value in RB Tree
+    def search(self, value):
+        curr_node = self.root
+        while curr_node is not None:
+            if value == curr_node.value:
+                return curr_node
+            elif value < curr_node.value:
+                curr_node = curr_node.left
             else:
-                # Получаем дядю элемента new_node.
-                uncle = new_node.get_uncle()
+                curr_node = curr_node.right
+        return None
 
-                # Если дядя красный.
-                if uncle and uncle.color == 'red':
-                    new_node.parent.color = 'black'
-                    uncle.color = 'black'
-                    new_node.get_grandparent().color = 'red'
-                    new_node = new_node.get_grandparent()
-                # Если дядя черный.
-                else:
-                    if new_node == new_node.parent.left:
-                        new_node = new_node.parent
-                        self.__rotate_right(new_node)
-                    new_node.parent.color = 'black'
-                    new_node.get_grandparent().color = 'red'
-                    self.__rotate_left(new_node.get_grandparent())
-        self.root.color = 'black'
-
-
-    # Обычная функция вставки, которая есть в Binary_Search_Tree.
+    # function to insert a node in RB Tree, similar to BST insertion
     def insert(self, value):
-        # Создаем узел с новым значением.
+        # Regular insertion
         new_node = RBNode(value)
         if self.root is None:
             self.root = new_node
@@ -128,18 +71,109 @@ class RedblackTree:
                         break
                     else:
                         curr_node = curr_node.right
+        self.insert_fix(new_node)
 
-        # После обычной вставки делаем балансровку дерева.
-        self.__insert_fix(new_node)
+    # Function to fix RB tree properties after insertion
+    def insert_fix(self, new_node):
+        while new_node.parent and new_node.parent.color == 'red':
+            if new_node.parent == new_node.grandparent().left:
+                uncle = new_node.uncle()
+                if uncle and uncle.color == 'red':
+                    new_node.parent.color = 'black'
+                    uncle.color = 'black'
+                    new_node.grandparent().color = 'red'
+                    new_node = new_node.grandparent()
+                else:
+                    if new_node == new_node.parent.right:
+                        new_node = new_node.parent
+                        self.rotate_left(new_node)
+                    new_node.parent.color = 'black'
+                    new_node.grandparent().color = 'red'
+                    self.rotate_right(new_node.grandparent())
+            else:
+                uncle = new_node.uncle()
+                if uncle and uncle.color == 'red':
+                    new_node.parent.color = 'black'
+                    uncle.color = 'black'
+                    new_node.grandparent().color = 'red'
+                    new_node = new_node.grandparent()
+                else:
+                    if new_node == new_node.parent.left:
+                        new_node = new_node.parent
+                        self.rotate_right(new_node)
+                    new_node.parent.color = 'black'
+                    new_node.grandparent().color = 'red'
+                    self.rotate_left(new_node.grandparent())
+        self.root.color = 'black'
 
+    # function to delete a value from RB Tree
+    def delete(self, value):
+        node_to_remove = self.search(value)
 
+        if node_to_remove is None:
+            return
 
+        if node_to_remove.left is None or node_to_remove.right is None:
+            self._replace_node(
+                node_to_remove, node_to_remove.left or node_to_remove.right)
+        else:
+            successor = self._find_min(node_to_remove.right)
+            node_to_remove.value = successor.value
+            self._replace_node(successor, successor.right)
 
-    # После вставки, нам нужно сбалансировать наше дерево, вот две приватные функции для этого.
+        self.delete_fix(node_to_remove)
 
+    # function to fix RB Tree properties after deletion
+    def delete_fix(self, x):
+        while x != self.root and x.color == 'black':
+            if x == x.parent.left:
+                sibling = x.sibling()
+                if sibling.color == 'red':
+                    sibling.color = 'black'
+                    x.parent.color = 'red'
+                    self.rotate_left(x.parent)
+                    sibling = x.sibling()
+                if (sibling.left is None or sibling.left.color == 'black') and (sibling.right is None or sibling.right.color == 'black'):
+                    sibling.color = 'red'
+                    x = x.parent
+                else:
+                    if sibling.right is None or sibling.right.color == 'black':
+                        sibling.left.color = 'black'
+                        sibling.color = 'red'
+                        self.rotate_right(sibling)
+                        sibling = x.sibling()
+                    sibling.color = x.parent.color
+                    x.parent.color = 'black'
+                    if sibling.right:
+                        sibling.right.color = 'black'
+                    self.rotate_left(x.parent)
+                    x = self.root
+            else:
+                sibling = x.sibling()
+                if sibling.color == 'red':
+                    sibling.color = 'black'
+                    x.parent.color = 'red'
+                    self.rotate_right(x.parent)
+                    sibling = x.sibling()
+                if (sibling.left is None or sibling.left.color == 'black') and (sibling.right is None or sibling.right.color == 'black'):
+                    sibling.color = 'red'
+                    x = x.parent
+                else:
+                    if sibling.left is None or sibling.left.color == 'black':
+                        sibling.right.color = 'black'
+                        sibling.color = 'red'
+                        self.rotate_left(sibling)
+                        sibling = x.sibling()
+                    sibling.color = x.parent.color
+                    x.parent.color = 'black'
+                    if sibling.left:
+                        sibling.left.color = 'black'
+                    self.rotate_right(x.parent)
+                    x = self.root
+        x.color = 'black'
 
-    # Левое вращение для Красно-Черного дерева.
-    def __rotate_left(self, node):
+    # Function for left rotation of RB Tree
+    def rotate_left(self, node):
         right_child = node.right
         node.right = right_child.left
 
@@ -158,9 +192,8 @@ class RedblackTree:
         right_child.left = node
         node.parent = right_child
 
-
-    # Правое вращение для Красно-Черного дерева.
-    def __rotate_right(self, node):
+    # function for right rotation of RB Tree
+    def rotate_right(self, node):
         left_child = node.left
         node.left = left_child.right
 
@@ -179,92 +212,28 @@ class RedblackTree:
         left_child.right = node
         node.parent = left_child
 
-
-    def search(self, value):
-        curr_node = self.root
-        while curr_node is not None:
-            if value == curr_node.value:
-                return curr_node
-            elif value < curr_node.value:
-                curr_node = curr_node.left
-            else:
-                curr_node = curr_node.right
-        return None
-    def delete(self, value):
-        node_to_remove = self.search(value)
-
-        if node_to_remove is None:
-            return
-
-        if node_to_remove.left is None or node_to_remove.right is None:
-            self._replace_node(node_to_remove, node_to_remove.left or node_to_remove.right)
+    # function to replace an old node with a new node
+    def _replace_node(self, old_node, new_node):
+        if old_node.parent is None:
+            self.root = new_node
         else:
-            successor = self._find_min(node_to_remove.right)
-            node_to_remove.value = successor.value
-            self._replace_node(successor, successor.right)
-
-        self.delete_fix(node_to_remove)
-
-    def delete_fix(self, x):
-        while x != self.root and x.color == 'black':
-            if x == x.parent.left:
-                sibling = x.sibling()
-                if sibling.color == 'red':
-                    sibling.color = 'black'
-                    x.parent.color = 'red'
-                    self.__rotate_left(x.parent)
-                    sibling = x.sibling()
-                if (sibling.left is None or sibling.left.color == 'black') and (sibling.right is None or sibling.right.color == 'black'):
-                    sibling.color = 'red'
-                    x = x.parent
-                else:
-                    if sibling.right is None or sibling.right.color == 'black':
-                        sibling.left.color = 'black'
-                        sibling.color = 'red'
-                        self.__rotate_right(sibling)
-                        sibling = x.sibling()
-                    sibling.color = x.parent.color
-                    x.parent.color = 'black'
-                    if sibling.right:
-                        sibling.right.color = 'black'
-                    self.__rotate_left(x.parent)
-                    x = self.root
+            if old_node == old_node.parent.left:
+                old_node.parent.left = new_node
             else:
-                sibling = x.sibling()
-                if sibling.color == 'red':
-                    sibling.color = 'black'
-                    x.parent.color = 'red'
-                    self.__rotate_right(x.parent)
-                    sibling = x.sibling()
-                if (sibling.left is None or sibling.left.color == 'black') and (sibling.right is None or sibling.right.color == 'black'):
-                    sibling.color = 'red'
-                    x = x.parent
-                else:
-                    if sibling.left is None or sibling.left.color == 'black':
-                        sibling.right.color = 'black'
-                        sibling.color = 'red'
-                        self.__rotate_left(sibling)
-                        sibling = x.sibling()
-                    sibling.color = x.parent.color
-                    x.parent.color = 'black'
-                    if sibling.left:
-                        sibling.left.color = 'black'
-                    self.__rotate_right(x.parent)
-                    x = self.root
-        x.color = 'black'
+                old_node.parent.right = new_node
+        if new_node is not None:
+            new_node.parent = old_node.parent
 
+    # function to find node with minimum value in a subtree
+    def _find_min(self, node):
+        while node.left is not None:
+            node = node.left
+        return node
 
+    # function to perform inorder traversal
+    def _inorder_traversal(self, node):
+        if node is not None:
+            self._inorder_traversal(node.left)
+            print(node.value, end=" ")
+            self._inorder_traversal(node.right)
 
-
-
-
-# RBTree = RedblackTree()
-# RBTree.insert(43)
-# RBTree.insert(2)
-# RBTree.insert(3)
-# RBTree.insert(4)
-# RBTree.insert(5)
-# RBTree.insert(15)
-# RBTree.insert(76)
-# RBTree.insert(3)
-# RBTree.insert(8)
