@@ -148,9 +148,11 @@ class RedblackTree:
         g.right = x
         x.parent = g
 
+        y.left = b
+
         if b:
-            x.right = y
-        y.parent = x
+            b.parent = y
+
 
         x.right = y
         y.parent = x
@@ -164,9 +166,10 @@ class RedblackTree:
         g.left = x
         x.parent = g
 
+        y.right = b
+
         if b:
             b.parent = y
-        y.right = b
 
         x.left = y
         y.parent = x
@@ -231,6 +234,32 @@ class RedblackTree:
         self.__insert_fix(new_node)
 
 
+    def __eq__(self, other):
+        if other is None:
+            return False
+        return self._compare_trees(self.root, other.root)
+    def _compare_trees(self, node1, node2):
+        # Если оба узла None, то они равны
+        if node1 is None and node2 is None:
+            return True
+
+        # Если только один из узлов None, то деревья не равны
+        if node1 is None or node2 is None:
+            return False
+
+        if (node1.parent is None and node2.parent is not None) or \
+                (node1.parent is not None and node2.parent is None):
+            return False
+
+        # Сравниваем ключи и цвета узлов
+        if node1.value != node2.value or node1.color != node2.color:
+            return False
+
+        # Рекурсивно сравниваем левое и правое поддеревья
+        return self._compare_trees(node1.left, node2.left) and \
+            self._compare_trees(node1.right, node2.right)
+
+
     def search(self, root, value):
         current = root
         while current is not None:
@@ -258,6 +287,9 @@ class RedblackTree:
         if remove_node is None:
             print('Нет такого узла')
             return
+        if remove_node == self.root and remove_node.left is None and remove_node.right is None:
+            self.root = None
+            return
 
         if remove_node.left and remove_node.right:
             new_remove_node = self.find_max(remove_node.left)
@@ -268,9 +300,9 @@ class RedblackTree:
         if remove_node.color == 'red' and not remove_node.left and not remove_node.right:
             if remove_node.parent:
                 if remove_node == remove_node.parent.left:
-                    remove_node.left = None
+                    remove_node.parent.left = None
                 else:
-                    remove_node.right = None
+                    remove_node.parent.right = None
             return
 
 
@@ -291,7 +323,6 @@ class RedblackTree:
                 self.__balanced_for_deleted_right(remove_node, True)
             else:
                 self.__balanced_for_deleted_left(remove_node, True)
-
 
 
     def __balanced_for_deleted_right(self, remove_node, flag):
@@ -319,6 +350,7 @@ class RedblackTree:
             else:
                 c.color = 'black'
                 self.root = c
+                c.parent = None
 
             c.right = a
             a.parent = c
@@ -337,7 +369,7 @@ class RedblackTree:
             return
 
         # 2.1.1
-        elif a and a.color=='red' and b and c and r.color == 'red':
+        elif a and a.color=='red' and b and r and r.color == 'red': # РАБОТАЕТ !!!
             if a:
                 g = a.parent
 
@@ -360,6 +392,7 @@ class RedblackTree:
             else:
                 b.color = 'black'
                 self.root = b
+                b.parent = None
 
             return
 
@@ -400,6 +433,7 @@ class RedblackTree:
                         d_1.parent = g
                     else:
                         self.root = d_1
+                        d_1.parent = None
 
 
 
@@ -425,6 +459,8 @@ class RedblackTree:
                     else:
                         self.root = d_2
 
+                        d_2.parent = None
+
 
                     a.left = e
                     if e:
@@ -440,7 +476,7 @@ class RedblackTree:
 
 
                 # 2.2.1.2
-                else:
+                else: # ВЕРНО!!!!!!!
                     b.right = a
                     a.parent = b
                     a.left = c
@@ -463,6 +499,7 @@ class RedblackTree:
                         b.parent = g
                     else:
                         self.root = b
+                        b.parent = None
                 return
 
         elif a and a.color=='black' and b and b.color=='black':
@@ -472,7 +509,7 @@ class RedblackTree:
             g = a.parent
 
             # 2.2.2.1
-            if b_2 and b_2=='red':
+            if b_2 and b_2.color=='red':
                 b_2_1 = b_2.left
                 b_2_2 = b_2.right
 
@@ -497,12 +534,13 @@ class RedblackTree:
                     b_2.parent = g
                 else:
                     self.root = b_2
+                    b_2.parent = None
 
                 if flag:
                     a.right = None
                 b_2.color = 'black'
 
-            elif b_1 and b_1=='red':
+            elif b_1 and b_1.color=='red':
 
                 b.right = a
                 a.parent = b
@@ -520,20 +558,27 @@ class RedblackTree:
                     b.parent = g
                 else:
                     self.root = b
+                    b.parent = None
 
                 if flag:
                     a.right = None
+
                 b_1.color = 'black'
 
 
             # 2.2.2.2
             else:
                 b.color = 'red'
+                a.right = None
                 if a.parent:
-                    if a == a.prent.right:
+                    if a == a.parent.right:
                         self.__balanced_for_deleted_right(a, False)
                     else:
                         self.__balanced_for_deleted_left(a, False)
+                else:
+                    a.left.color = 'red'
+                    a.right = None
+
             return
 
     def __balanced_for_deleted_left(self, remove_node, flag):
@@ -646,6 +691,8 @@ class RedblackTree:
                     b.left = d_1
                     d_1.parent = b
                     d_1.color = 'black'
+
+
                 elif d_2 and d_2.color=='red':
                     d_2.right = b
                     b.parent = d_2
@@ -707,114 +754,101 @@ class RedblackTree:
 
         elif a and a.color=='black' and b and b.color=='black':
 
-            b_1 = b.right
-            b_2 = b.left
+            b_1 = b.left
+            b_2 = b.right
             g = a.parent
 
             # 2.2.2.1
-            if b_2 and b_2=='red':
-                b_2_1 = b_2.right
-                b_2_2 = b_2.left
-
-                b_2.right = b
-                b.parent = b_2
-
-                b_2.left = a
-                a.parent = b_2
-                a.right = b_2_2
-                if b_2_2:
-                    b_2_2.parent = a
-
-                b.left = b_2_1
-                if b_2_1:
-                    b_2_1.parent = b
-
-                if g:
-                    if a==g.right:
-                        g.right = b_2
-                    else:
-                        g.left = b_2
-                    b_2.parent = g
-                else:
-                    self.root = b_2
-
-                if flag:
-                    a.left = None
-                b_2.color = 'black'
-
-            elif b_1 and b_1=='red':
-
+            if b_2 and b_2.color=='red': # РАБОТАЕТ!!!
                 b.left = a
                 a.parent = b
 
-                a.right = b_2
-                if b_2:
-                    b_2.parent = a
+                if flag:
+                    a.left = None
 
+                a.right = b_1
+                if b_1:
+                    b_1.parent = a
 
                 if g:
-                    if a == g.right:
-                        g.right = b
-                    else:
+                    if a==g.left:
                         g.left = b
+                    else:
+                        g.right = b
                     b.parent = g
                 else:
                     self.root = b
+                    b.parent = None
 
-                if flag:
-                    a.left = None
+                b_2.color = 'black'
+
+                return
+
+
+
+
+            elif b_1 and b_1.color=='red':
+                b_1_1 = b_1.left
+                b_1_2 = b_1.right
+
+                b_1.left = a
+                a.parent = b_1
+                a.right = b_1_1
+                if b_1_1:
+                    b_1_1.parent = a
+
+                b_1.right = b
+                b.parent = b_1
+                b.left = b_1_2
+                if b_1_2:
+                    b_1_2.parent = b
+
                 b_1.color = 'black'
 
+                if g:
+                    if a == g.right:
+                        g.right = b_1
+                    else:
+                        g.left = b_1
+                    b_1.parent = b_1
+                else:
+                    self.root = b_1
+                    b_1.parent = None
+                a.left = None
+
+                return
 
             # 2.2.2.2
             else:
                 b.color = 'red'
-                if a.aprent:
-                    if a == a.prent.right:
+                a.left = None
+                if a.parent:
+                    if a == a.parent.right:
                         self.__balanced_for_deleted_right(a, False)
                     else:
                         self.__balanced_for_deleted_left(a, False)
+                else:
+                    a.right.color = 'red'
+                    a.left = None
             return
 
 
-
-    def __eq__(self, other):
-        if other is None:
-            return False
-        return self._compare_trees(self.root, other.root)
-    def _compare_trees(self, node1, node2):
-        # Если оба узла None, то они равны
-        if node1 is None and node2 is None:
-            return True
-
-        # Если только один из узлов None, то деревья не равны
-        if node1 is None or node2 is None:
-            return False
-
-        # Сравниваем ключи и цвета узлов
-        if node1.value != node2.value or node1.color != node2.color:
-            return False
-
-        # Рекурсивно сравниваем левое и правое поддеревья
-        return self._compare_trees(node1.left, node2.left) and \
-            self._compare_trees(node1.right, node2.right)
 
 
 tree_my = RedblackTree()
 tree_true = Red_black_tree.RedBlackTree()
 
-a = [45, 32, 72, 70, 28, 21, 56, 16]
+a = [20,10,25,4,16,23,20,2,5,14,17,3,12,15,19,11]
+
 
 for i in a:
     tree_my.insert(i)
-    tree_true.insert(i)
 
-print(end='')
-
-z = a[0]
-tree_true.delete(z)
-tree_my.deleted(z)
-print(z)
+tree_my.deleted(3)
+tree_my.deleted(2)
 
 print()
+
+
+
 
