@@ -848,7 +848,3 @@ tree_my.deleted(3)
 tree_my.deleted(2)
 
 print()
-
-
-
-
