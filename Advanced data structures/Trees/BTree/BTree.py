@@ -1,3 +1,6 @@
+
+# https://www.cs.usfca.edu/~galles/visualization/BTree.html
+
 class BTreeNode:
     def __init__(self, leaf=False):
         self.leaf = leaf # Проверка есть ли хоть один ключ в узле.
@@ -34,7 +37,6 @@ class BTree:
 
     # Небольшая работа с
     def insert(self,value):
-        print()
         if self.root == None:
             self.root = BTreeNode(True)
             self.root.keys.append(value)
@@ -70,8 +72,8 @@ class BTree:
 
         self.__insert(self.root, None ,value)
 
+
     def __insert(self, root, parent, value):
-        print()
         # Если нет отца, значит его длина не избыточна, так как мы проверяли его
         # избыточность до того как запуститься эта функция.
         if parent:
@@ -149,13 +151,213 @@ class BTree:
                 root.keys.append(value)
         return
 
+    def find_max(self, root):
+        pass
+    def find_min(self, root):
+        pass
 
-b = BTree(2)
-b.insert(1)
-b.insert(2)
-b.insert(3)
-b.insert(4)
-b.insert(5)
-b.insert(6)
-b.insert(0)
-print()
+
+    def delete(self, value):
+        self.__delete(self.root, [None, None], value, True)
+
+    def __delete(self, root, arr_, value, in_root):
+        if in_root:
+            # Если root - корневой узел.
+            if root:
+                for i in range(len(root.keys)):
+
+                    if root.keys[i]>value and i==0:
+                        if root.child and root.child[0]:
+                            n_value = self.find_max(root.child[0])
+                            root.keys[0] = n_value
+
+                            return self.__delete(root.child[0], [root, 0], n_value, False)
+
+                    elif root.keys[i]==value:
+
+                        # Удаляемый элемент находится в корне и у корня есть дочерние узлы.
+                        if root.child and root.child[i]:
+                            n_value = self.find_max(root.child[i])
+                            root.keys[i] = n_value
+
+                            return self.__delete(root.child[i], [root, i], n_value, False)
+                        else:
+                            # Удаляемый узел находится на корне и при этом у него нет дочерних элементов.
+                            del root.keys[i] # Просто удаляем и все готово.
+                            return True
+
+                    elif root.keys[i] > value:
+
+                        if root.child and root.child[i]:
+                            return self.__delete(root.child[i], [root, i], value, False)
+                        else:
+                            # Нет удаляемого узла.
+                            return False
+
+                    elif i+1==len(root.keys) and root.keys[-1] < value:
+                        if root.child and root.child[-1]:
+                            return self.__delete(root.child[-1], [root, -1], value, False)
+                        else:
+                            return False
+
+        else:
+            # Если код зашел сюда, это значит что мы работаем не с корневым узлом.
+
+            # Посмотрим длину узла.
+            if len(root.keys)>=self.t:
+
+                # Ищем удаляемый элемент в узле.
+                for i in range(len(root.keys)):
+                    if root.keys[i] > value and i==0:
+                        if root.child and root.child[0]:
+                            n_value = self.find_max(root.child[0])
+                            root.keys[i] = n_value
+
+                            return self.__delete(root.child[0], [root, 0], n_value, False)
+                        else:
+                            del root.keys[i]
+                            return True
+
+                    elif root.keys[i]==value:
+
+                        if root.child and root.child[i]:
+                            n_value = self.find_max(root.child[i])
+                            root.keys[i] = n_value
+
+                            return self.__delete(root.child[i], [root, i], n_value, False)
+                        else:
+                            # Удаляемый узел находиться на листке, значит кайф, просто удаляем его и все.
+                            del root.keys[i]
+                            return True
+
+                    elif root.keys[i] > value:
+                        if root.child and root.child[i]:
+                            return self.__delete(self.root.child[i],[root, i], value, False)
+                        else:
+                            return False
+
+                    elif i+1==len(root.keys) and root.keys[-1] < value:
+                        if root.child and root.child[-1]:
+                            return self.__delete(root.child[-1], [root, -1], value, False)
+                        else:
+                            return False
+            else:
+
+                # Поменять длина и посмотреть есть нужно ли удалять в этом узле или нужно углубляться.
+
+                # Длина оказалась t-1.
+                # Первая попытка все починить.
+                parent, index = tuple(arr_)
+
+                # Проверка правого брата.
+                if index != len(parent.keys) and len(parent.child[index+1].keys) >= self.t:
+                    z = parent.child[index+1].keys[0]
+                    y = parent.keys[index]
+
+                    parent.keys[index] = z
+                    parent.child[index+1].keys = parent.child[index+1].keys[1:]
+                    root.keys.append(y)
+
+                    alpha = parent.child[index+1].child[0]
+                    parent.child[index+1].child = parent.child[index+1][1:]
+
+                    root.child.append(alpha)
+
+                    # Длина была нормализована.
+
+                    # Теперь ищем удаляемый элемент в обновленном узле
+                    for i in range(len(root.keys)):
+                        if root.keys[i] > value and i==0:
+                            if root.child and root.child[0]:
+                                n_value = self.find_max(root.child[0])
+                                root.keys[i] = n_value
+
+                                return self.__delete(root.child[0], [root, 0], n_value, False)
+                            else:
+                                del root.keys[i]
+                                return True
+
+                        elif root.keys[i]==value:
+
+                            if root.child and root.child[i]:
+                                n_value = self.find_max(root.child[i])
+                                root.keys[i] = n_value
+
+                                return self.__delete(root.child[i], [root, i], n_value, False)
+                            else:
+                                # Удаляемый узел находиться на листке, значит кайф, просто удаляем его и все.
+                                del root.keys[i]
+                                return True
+
+                        elif root.keys[i] > value:
+                            if root.child and root.child[i]:
+                                return self.__delete(self.root.child[i],[root, i], value, False)
+                            else:
+                                return False
+
+                        elif i+1==len(root.keys) and root.keys[-1] < value:
+                            if root.child and root.child[-1]:
+                                return self.__delete(root.child[-1], [root, -1], value, False)
+                            else:
+                                return False
+
+
+                # Если правый брат нам не подходит, проверим левого брата.
+                elif index != 0 and len(parent.child[index-1].keys) >= self.t:
+
+                    z = parent.child[index-1].keys[-1]
+                    y = parent.keys[index]
+
+                    parent.keys[index] = z
+                    parent.child[index-1].keys = parent.child[index-1].keys[:-1]
+
+                    alpha = parent.child[index-1].child.pop()
+
+                    root.child = [alpha] + root.child
+
+
+                    # Теперь ищем удаляемый элемент в обновленном узле.
+                    for i in range(len(root.keys)):
+                        if root.keys[i] > value and i==0:
+                            if root.child and root.child[0]:
+                                n_value = self.find_max(root.child[0])
+                                root.keys[i] = n_value
+
+                                return self.__delete(root.child[0], [root, 0], n_value, False)
+                            else:
+                                del root.keys[i]
+                                return True
+
+                        elif root.keys[i]==value:
+
+                            if root.child and root.child[i]:
+                                n_value = self.find_max(root.child[i])
+                                root.keys[i] = n_value
+
+                                return self.__delete(root.child[i], [root, i], n_value, False)
+                            else:
+                                # Удаляемый узел находиться на листке, значит кайф, просто удаляем его и все.
+                                del root.keys[i]
+                                return True
+
+                        elif root.keys[i] > value:
+                            if root.child and root.child[i]:
+                                return self.__delete(self.root.child[i],[root, i], value, False)
+                            else:
+                                return False
+
+                        elif i+1==len(root.keys) and root.keys[-1] < value:
+                            if root.child and root.child[-1]:
+                                return self.__delete(root.child[-1], [root, -1], value, False)
+                            else:
+                                return False
+
+
+                # Если не получается поработать с братьям, то объеденим два брата с t-1 длиной.
+                # А так мы можем сделать так как родитель горантировано будет с длиной >=t, мы сделали его таковым
+                # на предыдущей итарации рекурсии.
+                elif 1:
+                    pass
+
+
+
