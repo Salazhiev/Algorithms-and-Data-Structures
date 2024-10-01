@@ -14,6 +14,10 @@ class BTreeNode:
                 child.display(level + 1)
 
 
+
+
+
+
 class BTree:
     # t - главный параметр в B-Дереве.
     def __init__(self, t):
@@ -152,14 +156,21 @@ class BTree:
         return
 
     def find_max(self, root):
-        pass
+        while root.child[-1]:
+            root = root.child[-1]
+        return root[-1]
+
     def find_min(self, root):
         pass
 
 
+    # Понимаю, что нахавеакодил удаление, но нет времени уменьшать код, в общем нормально.
     def delete(self, value):
         self.__delete(self.root, [None, None], value, True)
 
+    # Функция принимает следующие аргументы:
+    # root - узел с которым мы работаем на итерации.
+    # arr_ - [Родитель root, ]
     def __delete(self, root, arr_, value, in_root):
         if in_root:
             # Если root - корневой узел.
@@ -203,6 +214,7 @@ class BTree:
         else:
             # Если код зашел сюда, это значит что мы работаем не с корневым узлом.
 
+
             # Посмотрим длину узла.
             if len(root.keys)>=self.t:
 
@@ -241,16 +253,20 @@ class BTree:
                             return self.__delete(root.child[-1], [root, -1], value, False)
                         else:
                             return False
+
+            # Если код зашел в этот else, то мы работаем не с корневым узлом и длина удаляемого < t (т.е. она равна t-1).
             else:
 
-                # Поменять длина и посмотреть есть нужно ли удалять в этом узле или нужно углубляться.
+                # Поменять длину и посмотреть нужно ли удалять в этом узле или нужно углубляться.
 
                 # Длина оказалась t-1.
                 # Первая попытка все починить.
                 parent, index = tuple(arr_)
 
+
+
                 # Проверка правого брата.
-                if index != len(parent.keys) and len(parent.child[index+1].keys) >= self.t:
+                if index != len(parent.keys)-1 and len(parent.child[index+1].keys) >= self.t:
                     z = parent.child[index+1].keys[0]
                     y = parent.keys[index]
 
@@ -310,6 +326,7 @@ class BTree:
 
                     parent.keys[index] = z
                     parent.child[index-1].keys = parent.child[index-1].keys[:-1]
+                    root.keys = [y] + root.keys
 
                     alpha = parent.child[index-1].child.pop()
 
@@ -356,8 +373,63 @@ class BTree:
                 # Если не получается поработать с братьям, то объеденим два брата с t-1 длиной.
                 # А так мы можем сделать так как родитель горантировано будет с длиной >=t, мы сделали его таковым
                 # на предыдущей итарации рекурсии.
-                elif 1:
-                    pass
+                elif index!=len(root.keys)-1 and len(root.keys)==self.t-1 and len(parent.child[index+1].keys)==self.t-1:
+
+                    # Сплит с правым братом.
+
+                    y = parent.keys[index]
+                    D = parent.child[index+1]
+                    del parent.keys[index+1]
+                    del parent.child[index+1]
+
+
+                    root.keys.append(y)
+                    root.keys += D.keys
+                    root.child += D.child
+
+
+                    # ХЗ сработает ли, посмотрим.
+                    flag = self.__delete(root, [parent, None], value, False)
+
+                    if self.root is parent and len(parent.keys)==0:
+                        self.root = root
+                    return flag
+
+
+                elif index!=0 and len(root.keys)==self.t-1 and len(parent.child[index-1].keys)==self.t-1:
+
+                    # Сплит с левым братом.
+                    y = parent.keys[index]
+                    D = parent.child[index-1]
+                    del parent.keys[index-1]
+                    del parent.child[index-1]
+
+                    root.keys = [y] + root.keys
+                    root.keys = D.keys + root.keys
+                    root.child = D.child + root.child
+
+
+                    flag = self.__delete(root, [parent, None], value, False)
+                    if self.root is parent and len(parent.keys)==0:
+                        self.root = root
+                    return flag
+
+        return False
+
+b = BTree(3)
+b.insert(5)
+b.insert(10)
+b.insert(15)
+b.insert(20)
+b.insert(25)
+b.insert(31)
+b.delete(20)
+b.delete(31)
+
+print()
+
+
+
 
 
 
