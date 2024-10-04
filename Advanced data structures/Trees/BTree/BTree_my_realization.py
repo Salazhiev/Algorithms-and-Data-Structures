@@ -1,3 +1,6 @@
+# МОГУТ БЫТЬ ОШИБКИ В КОДЕ, НЕ ПРОВЕРЯЛ КОД НА БОЛЬШОМ КОЛИЧЕСТВЕ ДАННЫХ ! НО ЧИСТО ЛОГИЧЕСКИ Я ПОНИМАЮ КАК РАБОТАЕТ МОЙ КОД
+# И КАК ИСПРАВЛЯТЬ ОШИБКИ.
+
 
 # https://www.cs.usfca.edu/~galles/visualization/BTree.html
 
@@ -15,9 +18,6 @@ class BTreeNode:
 
 
 
-
-
-
 class BTree:
     # t - главный параметр в B-Дереве.
     def __init__(self, t):
@@ -28,15 +28,29 @@ class BTree:
     def search(self, value):
         current = self.root
         while current:
-            for i in range(len(current.child)):
-                if current.keys[i]==value:
-                    return current.child[i]
+            for i in range(len(current.keys)):
+                if i==0 and current.keys[i] > value:
+                    current = current.child[0]
+                    break
+                elif current.keys[i] > value:
+                    if current.child:
+                        current = current.child[i]
+                        break
+                    else:
+                        return False
 
-                if current.keys[i]>value:
-                    current = current.child[i]
-                elif current.keys[i]<value and i==len(current.child)-1:
-                    current = current.child[-1]
-        return None
+                elif current.keys[i] < value and i+1==len(current.keys):
+                    if current.child:
+                        current = current.child[i]
+                        break
+                    else:
+                        return False
+
+                elif current.keys[i]==value:
+                    return True
+        return False
+
+
 
 
     # Небольшая работа с
@@ -68,14 +82,14 @@ class BTree:
                             A.child.append(self.root.child[i])
                 if self.root.child:
                     B.child.append(self.root.child[-1])
-
+                A.keys.sort()
+                B.keys.sort()
                 node.child.append(A)
                 node.child.append(B)
 
                 self.root = node
 
         self.__insert(self.root, None ,value)
-
 
     def __insert(self, root, parent, value):
         # Если нет отца, значит его длина не избыточна, так как мы проверяли его
@@ -89,6 +103,7 @@ class BTree:
                 for i in range(2*self.t-1):
                     if i < self.t - 1:
                         A.keys.append(root.keys[i])
+
                         if root.child:
                             A.child.append(root.child[i])
                     elif i > self.t - 1:
@@ -100,6 +115,8 @@ class BTree:
                             A.child.append(root.child[i])
                 if root.child:
                     B.child.append(root.child[-1])
+                A.keys.sort()
+                B.keys.sort()
 
                 x = root.keys[self.t - 1] # Элемент который должен быть подвешен на верх
                 flag = True
@@ -109,12 +126,14 @@ class BTree:
                         parent.child[0] = B
                         parent.child = [A] + parent.child
                         flag=False
+
                         break
                     elif x < parent.keys[i]:
                         parent.keys.append(x)
                         parent.keys.sort()
                         parent.child = parent.child[:i] + [A] + [B] + parent.child[i:]
                         flag=False
+
                         break
 
                 if x > parent.keys[-1] and flag:
@@ -122,11 +141,12 @@ class BTree:
                     parent.child[-1] = A
                     parent.child.append(B)
 
+                parent.keys.sort()
+
                 if x < value:
                     root = B
                 else:
                     root = A
-
 
 
 
@@ -153,6 +173,8 @@ class BTree:
                 self.__insert(root.child[-1], root, value)
             else:
                 root.keys.append(value)
+
+        root.keys.sort()
         return
 
     def find_max(self, root):
@@ -160,17 +182,15 @@ class BTree:
             root = root.child[-1]
         return root[-1]
 
-    def find_min(self, root):
-        pass
-
-
     # Понимаю, что нахавеакодил удаление, но нет времени уменьшать код, в общем нормально.
     def delete(self, value):
         self.__delete(self.root, [None, None], value, True)
 
     # Функция принимает следующие аргументы:
-    # root - узел с которым мы работаем на итерации.
-    # arr_ - [Родитель root, ]
+    # root - текущий узел рекурсии.
+    # arr_ - [Родитель узла root, индекс].
+    # value - удаляемое значение.
+    # in_root - находимся ли мы на данной итерации у корневного узла.
     def __delete(self, root, arr_, value, in_root):
         if in_root:
             # Если root - корневой узел.
@@ -205,9 +225,10 @@ class BTree:
                             # Нет удаляемого узла.
                             return False
 
+                    # Походу это можно считать за исключение и нужно переписать видимо!!!
                     elif i+1==len(root.keys) and root.keys[-1] < value:
                         if root.child and root.child[-1]:
-                            return self.__delete(root.child[-1], [root, -1], value, False)
+                            return self.__delete(root.child[-1], [root, len(root.keys)], value, False)
                         else:
                             return False
 
@@ -250,7 +271,7 @@ class BTree:
 
                     elif i+1==len(root.keys) and root.keys[-1] < value:
                         if root.child and root.child[-1]:
-                            return self.__delete(root.child[-1], [root, -1], value, False)
+                            return self.__delete(root.child[-1], [root, len(root.keys)], value, False)
                         else:
                             return False
 
@@ -266,7 +287,7 @@ class BTree:
 
 
                 # Проверка правого брата.
-                if index != len(parent.keys)-1 and len(parent.child[index+1].keys) >= self.t:
+                if index != len(parent.child)-1 and len(parent.child[index+1].keys) >= self.t:
                     z = parent.child[index+1].keys[0]
                     y = parent.keys[index]
 
@@ -313,7 +334,7 @@ class BTree:
 
                         elif i+1==len(root.keys) and root.keys[-1] < value:
                             if root.child and root.child[-1]:
-                                return self.__delete(root.child[-1], [root, -1], value, False)
+                                return self.__delete(root.child[-1], [root, len(root.keys)], value, False)
                             else:
                                 return False
 
@@ -365,7 +386,7 @@ class BTree:
 
                         elif i+1==len(root.keys) and root.keys[-1] < value:
                             if root.child and root.child[-1]:
-                                return self.__delete(root.child[-1], [root, -1], value, False)
+                                return self.__delete(root.child[-1], [root, len(root.keys)], value, False)
                             else:
                                 return False
 
@@ -376,8 +397,11 @@ class BTree:
                 elif index!=len(root.keys)-1 and len(root.keys)==self.t-1 and len(parent.child[index+1].keys)==self.t-1:
 
                     # Сплит с правым братом.
+                    try:
+                        y = parent.keys[index]
+                    except:
+                        y = parent.keys[index-1]
 
-                    y = parent.keys[index]
                     D = parent.child[index+1]
                     del parent.keys[index+1]
                     del parent.child[index+1]
@@ -393,13 +417,18 @@ class BTree:
 
                     if self.root is parent and len(parent.keys)==0:
                         self.root = root
+
                     return flag
 
 
                 elif index!=0 and len(root.keys)==self.t-1 and len(parent.child[index-1].keys)==self.t-1:
 
                     # Сплит с левым братом.
-                    y = parent.keys[index]
+                    try:
+                        y = parent.keys[index]
+                    except:
+                        y = parent.keys[index-1]
+
                     D = parent.child[index-1]
                     del parent.keys[index-1]
                     del parent.child[index-1]
@@ -422,11 +451,12 @@ b.insert(10)
 b.insert(15)
 b.insert(20)
 b.insert(25)
-b.insert(31)
-b.delete(20)
-b.delete(31)
+b.insert(1)
+
+print(b.search(31))
 
 print()
+
 
 
 
