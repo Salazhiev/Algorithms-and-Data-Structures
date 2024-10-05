@@ -1,6 +1,7 @@
-import random
+from random import randint
 
-a = [29,21,16,55,65,13,67,64,28,96,89,0,0,0,0,0]
-print(sum(a[:16//2]))
-print(sum(a[16//2:]))
-print(sum(a))
+array = [randint(1, 100) for _ in range(15)]
+print(array)
+
+
+# [21, 55, 21, 24, 17, 11, 48, 58, 73, 63, 23, 26, 28, 12, 30]
